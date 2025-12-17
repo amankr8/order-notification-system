@@ -7,17 +7,20 @@ import com.flykraft.model.stakeholder.DeliveryPartner;
 import com.flykraft.model.stakeholder.Vendor;
 import com.flykraft.repository.order.OrderRepo;
 import com.flykraft.service.notification.NotificationService;
-import com.flykraft.service.stakeholder.StakeHolderService;
+import com.flykraft.service.stakeholder.CustomerService;
+import com.flykraft.service.stakeholder.VendorService;
 
 public class OrderService {
 
     private final OrderRepo orderRepo;
-    private final StakeHolderService stakeHolderService;
+    private final CustomerService customerService;
+    private final VendorService vendorService;
     private final NotificationService notificationService;
 
-    public OrderService(OrderRepo orderRepo, StakeHolderService stakeHolderService, NotificationService notificationService) {
+    public OrderService(OrderRepo orderRepo, CustomerService customerService, VendorService vendorService, NotificationService notificationService) {
         this.orderRepo = orderRepo;
-        this.stakeHolderService = stakeHolderService;
+        this.customerService = customerService;
+        this.vendorService = vendorService;
         this.notificationService = notificationService;
     }
 
@@ -41,9 +44,9 @@ public class OrderService {
     }
 
     private void subscribeToRelevantStakeHolders(Order order) {
-        Customer customer = stakeHolderService.getCustomerById(order.getCustomerId());
+        Customer customer = customerService.getCustomerById(order.getCustomerId());
         notificationService.subscribe(customer.getStakeHolderId(), order.getOrderId());
-        Vendor vendor = stakeHolderService.getVendorById(order.getVendorId());
+        Vendor vendor = vendorService.getVendorById(order.getVendorId());
         notificationService.subscribe(vendor.getStakeHolderId(), order.getOrderId());
     }
 

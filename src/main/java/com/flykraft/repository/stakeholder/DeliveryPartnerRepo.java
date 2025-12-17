@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class PartnerRepo implements Repository<Integer, DeliveryPartner> {
+public class DeliveryPartnerRepo implements Repository<Integer, DeliveryPartner> {
     private int nextId;
     private final Map<Integer, DeliveryPartner> partnerData;
 
-    public PartnerRepo() {
+    public DeliveryPartnerRepo() {
         this.nextId = 1;
         partnerData = new HashMap<>();
     }

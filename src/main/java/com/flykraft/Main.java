@@ -6,12 +6,15 @@ import com.flykraft.repository.notification.NotifySubRepo;
 import com.flykraft.repository.notification.StatusPrefRepo;
 import com.flykraft.repository.order.OrderRepo;
 import com.flykraft.repository.stakeholder.CustomerRepo;
-import com.flykraft.repository.stakeholder.PartnerRepo;
+import com.flykraft.repository.stakeholder.DeliveryPartnerRepo;
 import com.flykraft.repository.stakeholder.StakeHolderRepo;
 import com.flykraft.repository.stakeholder.VendorRepo;
 import com.flykraft.service.notification.NotificationService;
 import com.flykraft.service.order.OrderService;
+import com.flykraft.service.stakeholder.CustomerService;
+import com.flykraft.service.stakeholder.DeliveryPartnerService;
 import com.flykraft.service.stakeholder.StakeHolderService;
+import com.flykraft.service.stakeholder.VendorService;
 
 public class Main {
     public static void main(String[] args) {
@@ -25,13 +28,18 @@ public class Main {
         StakeHolderRepo stakeHolderRepo = new StakeHolderRepo();
         CustomerRepo customerRepo = new CustomerRepo();
         VendorRepo vendorRepo = new VendorRepo();
-        PartnerRepo partnerRepo = new PartnerRepo();
+        DeliveryPartnerRepo deliveryPartnerRepo = new DeliveryPartnerRepo();
 
-        NotificationService notificationService = new NotificationService(stakeHolderRepo, notifySubRepo, notifyMsgRepo, channelPrefRepo, statusPrefRepo);
+        StakeHolderService stakeHolderService = new StakeHolderService(stakeHolderRepo);
 
-        StakeHolderService stakeHolderService = new StakeHolderService(stakeHolderRepo, customerRepo, vendorRepo, partnerRepo, notificationService);
-        OrderService orderService = new OrderService(orderRepo, stakeHolderService, notificationService);
+        NotificationService notificationService = new NotificationService(notifySubRepo, notifyMsgRepo, channelPrefRepo, statusPrefRepo, stakeHolderService);
 
-        DemoRunner.runDemo(stakeHolderService, orderService, notificationService);
+        CustomerService customerService = new CustomerService(customerRepo, stakeHolderService, notificationService);
+        VendorService vendorService = new VendorService(vendorRepo, stakeHolderService, notificationService);
+        DeliveryPartnerService deliveryPartnerService = new DeliveryPartnerService(deliveryPartnerRepo, stakeHolderService, notificationService);
+
+        OrderService orderService = new OrderService(orderRepo, customerService, vendorService, notificationService);
+
+        DemoRunner.runDemo(stakeHolderService, customerService, vendorService, deliveryPartnerService, orderService, notificationService);
     }
 }

@@ -10,6 +10,7 @@ import com.flykraft.repository.notification.NotifyMsgRepo;
 import com.flykraft.repository.notification.NotifySubRepo;
 import com.flykraft.repository.notification.StatusPrefRepo;
 import com.flykraft.repository.stakeholder.StakeHolderRepo;
+import com.flykraft.service.stakeholder.StakeHolderService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,18 +19,18 @@ import java.util.Set;
 
 public class NotificationService {
 
-    private final StakeHolderRepo stakeHolderRepo;
     private final NotifySubRepo notifySubRepo;
     private final NotifyMsgRepo notifyMsgRepo;
     private final ChannelPrefRepo channelPrefRepo;
     private final StatusPrefRepo statusPrefRepo;
+    private final StakeHolderService stakeHolderService;
 
-    public NotificationService(StakeHolderRepo stakeHolderRepo, NotifySubRepo notifySubRepo, NotifyMsgRepo notifyMsgRepo, ChannelPrefRepo channelPrefRepo, StatusPrefRepo statusPrefRepo) {
-        this.stakeHolderRepo = stakeHolderRepo;
+    public NotificationService(NotifySubRepo notifySubRepo, NotifyMsgRepo notifyMsgRepo, ChannelPrefRepo channelPrefRepo, StatusPrefRepo statusPrefRepo, StakeHolderService stakeHolderService) {
         this.notifySubRepo = notifySubRepo;
         this.notifyMsgRepo = notifyMsgRepo;
         this.channelPrefRepo = channelPrefRepo;
         this.statusPrefRepo = statusPrefRepo;
+        this.stakeHolderService = stakeHolderService;
         addDefaultNotificationMessages();
     }
 
@@ -45,15 +46,15 @@ public class NotificationService {
     }
 
     public void optInForNotifications(Integer stakeHolderId) {
-        StakeHolder stakeHolder = stakeHolderRepo.findById(stakeHolderId).orElseThrow();
+        StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(stakeHolderId);
         stakeHolder.setOptedInForNotifications(true);
-        stakeHolderRepo.save(stakeHolder);
+        stakeHolderService.updateStakeHolder(stakeHolder);
     }
 
     public void optOutOfNotifications(Integer stakeHolderId) {
-        StakeHolder stakeHolder = stakeHolderRepo.findById(stakeHolderId).orElseThrow();
+        StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(stakeHolderId);
         stakeHolder.setOptedInForNotifications(false);
-        stakeHolderRepo.save(stakeHolder);
+        stakeHolderService.updateStakeHolder(stakeHolder);
     }
 
     public void addStatusPreferences(Integer stakeHolderId, Set<OrderStatus> orderStatuses) {
@@ -87,7 +88,7 @@ public class NotificationService {
     public void notify(Order order) {
         List<NotifySub> subs = notifySubRepo.findByOrderId(order.getOrderId());
         for (NotifySub sub : subs) {
-            StakeHolder stakeHolder = stakeHolderRepo.findById(sub.getStakeHolderId()).orElseThrow();
+            StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
             if (stakeHolder.isOptedInForNotifications() && validatePreferenceByStakeHolderId(stakeHolder, order.getStatusId())) {
                 String message = getMessageByStakeHolderAndStatusId(stakeHolder, order.getStatusId());
                 List<Channel> channels = getPreferredChannelsByStakeHolderId(sub.getStakeHolderId());

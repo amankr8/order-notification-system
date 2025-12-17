@@ -7,14 +7,17 @@ import com.flykraft.model.stakeholder.DeliveryPartner;
 import com.flykraft.model.stakeholder.Vendor;
 import com.flykraft.service.notification.NotificationService;
 import com.flykraft.service.order.OrderService;
+import com.flykraft.service.stakeholder.CustomerService;
+import com.flykraft.service.stakeholder.DeliveryPartnerService;
 import com.flykraft.service.stakeholder.StakeHolderService;
+import com.flykraft.service.stakeholder.VendorService;
 
 public class DemoRunner {
-    public static void runDemo(StakeHolderService stakeHolderService, OrderService orderService, NotificationService notificationService) {
-        Customer customer1 = stakeHolderService.addCustomer(new Customer("John Doe"));
-        Customer customer2 = stakeHolderService.addCustomer(new Customer("Michael Horn"));
-        Vendor vendor = stakeHolderService.addVendor(new Vendor("Best Vendor"));
-        DeliveryPartner deliveryPartner = stakeHolderService.addPartner(new DeliveryPartner("Ekart Logistics"));
+    public static void runDemo(StakeHolderService stakeHolderService, CustomerService customerService, VendorService vendorService, DeliveryPartnerService deliveryPartnerService, OrderService orderService, NotificationService notificationService) {
+        Customer customer1 = customerService.createCustomer(new Customer("John Doe"));
+        Customer customer2 = customerService.createCustomer(new Customer("Michael Horn"));
+        Vendor vendor = vendorService.createVendor(new Vendor("Best Vendor"));
+        DeliveryPartner deliveryPartner = deliveryPartnerService.createPartner(new DeliveryPartner("Ekart Logistics"));
 
         System.out.println("\nCreating an order...");
         Order order1 = orderService.createOrder(new Order(customer1.getCustomerId(), vendor.getVendorId()));
@@ -28,6 +31,9 @@ public class DemoRunner {
 
         System.out.println("\nShipping the order...");
         orderService.changeStatus(order1, OrderStatus.SHIPPED);
+
+        notificationService.optInForNotifications(customer1.getStakeHolderId());
+        System.out.println("\n" + customer1.getCustomerName() + " has opted in for notifications.");
 
         System.out.println("\nDelivering the order...");
         orderService.changeStatus(order1, OrderStatus.DELIVERED);
