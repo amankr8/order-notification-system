@@ -1,5 +1,7 @@
 package com.flykraft.repository.notification;
 
+import com.flykraft.config.GlobalConfig;
+import com.flykraft.exception.ConstraintViolationException;
 import com.flykraft.model.notification.StatusPref;
 import com.flykraft.repository.Repository;
 
@@ -8,10 +10,12 @@ import java.util.*;
 public class StatusPrefRepo implements Repository<Integer, StatusPref> {
     private int nextId;
     private final Map<Integer, StatusPref> statusPrefData;
+    private final Map<String, Integer> constraintsMap;
 
     public StatusPrefRepo() {
         this.nextId = 1;
         this.statusPrefData = new HashMap<>();
+        this.constraintsMap = new HashMap<>();
     }
 
     @Override
@@ -26,11 +30,20 @@ public class StatusPrefRepo implements Repository<Integer, StatusPref> {
 
     @Override
     public StatusPref save(StatusPref entity) {
+        validateConstraint(entity);
         if (entity.getStatusPrefId() == null) {
             entity.setStatusPrefId(nextId++);
         }
         statusPrefData.put(entity.getStatusPrefId(), entity);
+        constraintsMap.putIfAbsent(getConstraintId(entity), entity.getStatusPrefId());
         return entity;
+    }
+
+    private void validateConstraint(StatusPref entity) {
+        String constraintId = getConstraintId(entity);
+        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getStatusPrefId())) {
+            throw new ConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
+        }
     }
 
     @Override
@@ -46,5 +59,9 @@ public class StatusPrefRepo implements Repository<Integer, StatusPref> {
             }
         }
         return statusPrefs;
+    }
+
+    private String getConstraintId(StatusPref entity) {
+        return entity.getStakeHolderId() + String.valueOf(entity.getOrderStatusId());
     }
 }

@@ -1,5 +1,7 @@
 package com.flykraft.repository.notification;
 
+import com.flykraft.config.GlobalConfig;
+import com.flykraft.exception.ConstraintViolationException;
 import com.flykraft.model.notification.NotifySub;
 import com.flykraft.repository.Repository;
 
@@ -8,10 +10,12 @@ import java.util.*;
 public class NotifySubRepo implements Repository<Integer, NotifySub> {
     private int nextId;
     private final Map<Integer, NotifySub> notifySubData;
+    private final Map<String, Integer> constraintsMap;
 
     public NotifySubRepo() {
         this.nextId = 1;
         this.notifySubData = new HashMap<>();
+        this.constraintsMap = new HashMap<>();
     }
 
     @Override
@@ -25,12 +29,21 @@ public class NotifySubRepo implements Repository<Integer, NotifySub> {
     }
 
     @Override
-    public NotifySub save(NotifySub notifySub) {
-        if (notifySub.getNotifySubId() == null) {
-            notifySub.setNotifySubId(nextId++);
+    public NotifySub save(NotifySub entity) {
+        validateConstraint(entity);
+        if (entity.getNotifySubId() == null) {
+            entity.setNotifySubId(nextId++);
         }
-        notifySubData.put(notifySub.getNotifySubId(), notifySub);
-        return notifySub;
+        notifySubData.put(entity.getNotifySubId(), entity);
+        constraintsMap.putIfAbsent(getConstraintId(entity), entity.getNotifySubId());
+        return entity;
+    }
+
+    private void validateConstraint(NotifySub entity) {
+        String constraintId = getConstraintId(entity);
+        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getNotifySubId())) {
+            throw new ConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
+        }
     }
 
     @Override
@@ -46,5 +59,9 @@ public class NotifySubRepo implements Repository<Integer, NotifySub> {
             }
         }
         return notifySubs;
+    }
+
+    private String getConstraintId(NotifySub entity) {
+        return entity.getStakeHolderId() + String.valueOf(entity.getOrderId());
     }
 }

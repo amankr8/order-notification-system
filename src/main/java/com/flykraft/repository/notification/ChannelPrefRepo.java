@@ -1,5 +1,6 @@
 package com.flykraft.repository.notification;
 
+import com.flykraft.config.GlobalConfig;
 import com.flykraft.exception.ConstraintViolationException;
 import com.flykraft.model.notification.ChannelPref;
 import com.flykraft.repository.Repository;
@@ -41,7 +42,7 @@ public class ChannelPrefRepo implements Repository<Integer, ChannelPref> {
     private void validateConstraint(ChannelPref entity) {
         String constraintId = getConstraintId(entity);
         if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getChannelPrefId())) {
-            throw new ConstraintViolationException("Data Constraint Violated - Selected channel preference for the stakeholder already exists.");
+            throw new ConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
         }
     }
 
