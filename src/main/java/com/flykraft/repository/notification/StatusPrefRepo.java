@@ -2,6 +2,7 @@ package com.flykraft.repository.notification;
 
 import com.flykraft.config.GlobalConfig;
 import com.flykraft.exception.ConstraintViolationException;
+import com.flykraft.model.notification.NotifyMsg;
 import com.flykraft.model.notification.StatusPref;
 import com.flykraft.repository.Repository;
 
@@ -48,6 +49,8 @@ public class StatusPrefRepo implements Repository<Integer, StatusPref> {
 
     @Override
     public void deleteById(Integer id) {
+        StatusPref entity = statusPrefData.get(id);
+        constraintsMap.remove(getConstraintId(entity));
         statusPrefData.remove(id);
     }
 

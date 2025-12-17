@@ -23,6 +23,10 @@ public class DemoRunner {
         DeliveryPartner deliveryPartner = deliveryPartnerService.createPartner(new DeliveryPartner("Ekart Logistics"));
 
         notificationService.removeChannelPreferences(customer1.getStakeHolderId(), Set.of(Channel.EMAIL.getId()));
+        System.out.println("\n" + customer1.getCustomerName() + " has removed " + Channel.EMAIL.getName() + " from his communication preferences");
+
+        notificationService.removeStatusPreferences(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
+        System.out.println("\n" + customer1.getCustomerName() + " has removed " + OrderStatus.DELIVERED.getName() + " status from his update preferences");
 
         System.out.println("\nCreating an order...");
         Order order1 = orderService.createOrder(new Order(customer1.getCustomerId(), vendor.getVendorId()));
@@ -32,6 +36,10 @@ public class DemoRunner {
         System.out.println("\n" + customer1.getCustomerName() + " has opted out of notifications.");
 
         notificationService.addChannelPreferences(customer1.getStakeHolderId(), Set.of(Channel.EMAIL.getId()));
+        System.out.println("\n" + customer1.getCustomerName() + " has added " + Channel.EMAIL.getName() + " to his communication preferences");
+
+        notificationService.addStatusPreferences(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
+        System.out.println("\n" + customer1.getCustomerName() + " has added " + OrderStatus.DELIVERED.getName() + " status to his update preferences");
 
         orderService.assignDeliveryPartner(order1.getOrderId(), deliveryPartner);
         System.out.println("\nDelivery Partner assigned -> " + deliveryPartner.getPartnerName());

@@ -48,6 +48,8 @@ public class NotifyMsgRepo implements Repository<Integer, NotifyMsg> {
 
     @Override
     public void deleteById(Integer id) {
+        NotifyMsg entity = notifyMsgData.get(id);
+        constraintsMap.remove(getConstraintId(entity));
         notifyMsgData.remove(id);
     }
 
