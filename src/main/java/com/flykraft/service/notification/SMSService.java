@@ -6,6 +6,6 @@ public class SMSService implements CommService {
 
     @Override
     public void sendNotification(String message) {
-        System.out.println("[SMS][" + LocalDateTime.now() + "][NOTIFICATION] - " + message);
+        System.out.println("[SMS]\t[" + LocalDateTime.now() + "]\t[NOTIFICATION] - " + message);
     }
 }
