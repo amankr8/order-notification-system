@@ -9,7 +9,6 @@ import com.flykraft.repository.notification.ChannelPrefRepo;
 import com.flykraft.repository.notification.NotifyMsgRepo;
 import com.flykraft.repository.notification.NotifySubRepo;
 import com.flykraft.repository.notification.StatusPrefRepo;
-import com.flykraft.repository.stakeholder.StakeHolderRepo;
 import com.flykraft.service.stakeholder.StakeHolderService;
 
 import java.util.ArrayList;
@@ -89,7 +88,7 @@ public class NotificationService {
         List<NotifySub> subs = notifySubRepo.findByOrderId(order.getOrderId());
         for (NotifySub sub : subs) {
             StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
-            if (stakeHolder.isOptedInForNotifications() && validatePreferenceByStakeHolderId(stakeHolder, order.getStatusId())) {
+            if (stakeHolder.hasOptedInForNotifications() && validatePreferenceByStakeHolder(stakeHolder, order.getStatusId())) {
                 String message = getMessageByStakeHolderAndStatusId(stakeHolder, order.getStatusId());
                 List<Channel> channels = getPreferredChannelsByStakeHolderId(sub.getStakeHolderId());
                 for (Channel channel : channels) {
@@ -99,7 +98,7 @@ public class NotificationService {
         }
     }
 
-    private boolean validatePreferenceByStakeHolderId(StakeHolder stakeHolder, Integer orderStatusId) {
+    private boolean validatePreferenceByStakeHolder(StakeHolder stakeHolder, Integer orderStatusId) {
         List<StatusPref> statusPrefs = statusPrefRepo.findByStakeHolderId(stakeHolder.getStakeHolderId());
         for (StatusPref statusPref : statusPrefs) {
             if (statusPref.getOrderStatusId().equals(orderStatusId)) {

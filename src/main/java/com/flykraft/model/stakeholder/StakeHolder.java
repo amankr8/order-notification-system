@@ -36,7 +36,7 @@ public class StakeHolder {
         this.categoryId = categoryId;
     }
 
-    public boolean isOptedInForNotifications() {
+    public boolean hasOptedInForNotifications() {
         return optedInForNotifications;
     }
 
