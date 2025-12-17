@@ -2,15 +2,14 @@ package com.flykraft.repository.notification;
 
 import com.flykraft.config.GlobalConfig;
 import com.flykraft.exception.ConstraintViolationException;
-import com.flykraft.model.notification.NotifyMsg;
-import com.flykraft.model.notification.StatusPref;
+import com.flykraft.model.notification.StatusSub;
 import com.flykraft.repository.Repository;
 
 import java.util.*;
 
-public class StatusPrefRepo implements Repository<Integer, StatusPref> {
+public class StatusPrefRepo implements Repository<Integer, StatusSub> {
     private int nextId;
-    private final Map<Integer, StatusPref> statusPrefData;
+    private final Map<Integer, StatusSub> statusPrefData;
     private final Map<String, Integer> constraintsMap;
 
     public StatusPrefRepo() {
@@ -20,51 +19,51 @@ public class StatusPrefRepo implements Repository<Integer, StatusPref> {
     }
 
     @Override
-    public List<StatusPref> findAll() {
+    public List<StatusSub> findAll() {
         return statusPrefData.values().parallelStream().toList();
     }
 
     @Override
-    public Optional<StatusPref> findById(Integer id) {
+    public Optional<StatusSub> findById(Integer id) {
         return Optional.ofNullable(statusPrefData.get(id));
     }
 
     @Override
-    public StatusPref save(StatusPref entity) {
+    public StatusSub save(StatusSub entity) {
         validateConstraint(entity);
-        if (entity.getStatusPrefId() == null) {
-            entity.setStatusPrefId(nextId++);
+        if (entity.getStatusSubId() == null) {
+            entity.setStatusSubId(nextId++);
         }
-        statusPrefData.put(entity.getStatusPrefId(), entity);
-        constraintsMap.putIfAbsent(getConstraintId(entity), entity.getStatusPrefId());
+        statusPrefData.put(entity.getStatusSubId(), entity);
+        constraintsMap.putIfAbsent(getConstraintId(entity), entity.getStatusSubId());
         return entity;
     }
 
-    private void validateConstraint(StatusPref entity) {
+    private void validateConstraint(StatusSub entity) {
         String constraintId = getConstraintId(entity);
-        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getStatusPrefId())) {
+        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getStatusSubId())) {
             throw new ConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
         }
     }
 
     @Override
     public void deleteById(Integer id) {
-        StatusPref entity = statusPrefData.get(id);
+        StatusSub entity = statusPrefData.get(id);
         constraintsMap.remove(getConstraintId(entity));
         statusPrefData.remove(id);
     }
 
-    public List<StatusPref> findByStakeHolderId(Integer stakeHolderId) {
-        List<StatusPref> statusPrefs = new ArrayList<>();
-        for (StatusPref statusPref : statusPrefData.values()) {
-            if (statusPref.getStakeHolderId().equals(stakeHolderId)) {
-                statusPrefs.add(statusPref);
+    public List<StatusSub> findByStakeHolderId(Integer stakeHolderId) {
+        List<StatusSub> statusSubs = new ArrayList<>();
+        for (StatusSub statusSub : statusPrefData.values()) {
+            if (statusSub.getStakeHolderId().equals(stakeHolderId)) {
+                statusSubs.add(statusSub);
             }
         }
-        return statusPrefs;
+        return statusSubs;
     }
 
-    private String getConstraintId(StatusPref entity) {
+    private String getConstraintId(StatusSub entity) {
         return entity.getStakeHolderId() + String.valueOf(entity.getOrderStatusId());
     }
 }

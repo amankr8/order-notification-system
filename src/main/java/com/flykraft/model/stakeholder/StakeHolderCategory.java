@@ -13,14 +13,14 @@ public enum StakeHolderCategory {
 
     private Integer id;
     private String name;
-    private Set<Integer> defaultChannels;
-    private Map<Integer, String> defaultMsgByStatusIds;
+    private Set<Integer> defaultSubscriptionChannels;
+    private Map<Integer, String> defaultSubscriptionMsgByStatusIds;
 
-    StakeHolderCategory(Integer id, String name, Set<Integer> defaultChannels, Map<Integer, String>defaultMsgByStatusIds) {
+    StakeHolderCategory(Integer id, String name, Set<Integer> defaultSubscriptionChannels, Map<Integer, String> defaultSubscriptionMsgByStatusIds) {
         this.id = id;
         this.name = name;
-        this.defaultChannels = defaultChannels;
-        this.defaultMsgByStatusIds = defaultMsgByStatusIds;
+        this.defaultSubscriptionChannels = defaultSubscriptionChannels;
+        this.defaultSubscriptionMsgByStatusIds = defaultSubscriptionMsgByStatusIds;
     }
 
     public Integer getId() {
@@ -39,20 +39,20 @@ public enum StakeHolderCategory {
         this.name = name;
     }
 
-    public Set<Integer> getDefaultChannels() {
-        return defaultChannels;
+    public Set<Integer> getDefaultSubscriptionChannels() {
+        return defaultSubscriptionChannels;
     }
 
-    public void setDefaultChannels(Set<Integer> defaultChannels) {
-        this.defaultChannels = defaultChannels;
+    public void setDefaultSubscriptionChannels(Set<Integer> defaultSubscriptionChannels) {
+        this.defaultSubscriptionChannels = defaultSubscriptionChannels;
     }
 
-    public Map<Integer, String> getDefaultMsgByStatusIds() {
-        return defaultMsgByStatusIds;
+    public Map<Integer, String> getDefaultSubscriptionMsgByStatusIds() {
+        return defaultSubscriptionMsgByStatusIds;
     }
 
-    public void setDefaultMsgByStatusIds(Map<Integer, String> defaultMsgByStatusIds) {
-        this.defaultMsgByStatusIds = defaultMsgByStatusIds;
+    public void setDefaultSubscriptionMsgByStatusIds(Map<Integer, String> defaultSubscriptionMsgByStatusIds) {
+        this.defaultSubscriptionMsgByStatusIds = defaultSubscriptionMsgByStatusIds;
     }
 
     private static Set<Integer> getDefaultChannelIds() {

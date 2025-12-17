@@ -43,15 +43,15 @@ public class OrderService {
         Order order = getOrderById(orderId);
         order.setPartnerId(partnerId);
         DeliveryPartner deliveryPartner = deliveryPartnerService.getPartnerById(partnerId);
-        notificationService.subscribe(deliveryPartner.getStakeHolderId(), order.getOrderId());
+        notificationService.subscribeToOrder(deliveryPartner.getStakeHolderId(), order.getOrderId());
         orderRepo.save(order);
     }
 
     private void subscribeToRelevantStakeHolders(Order order) {
         Customer customer = customerService.getCustomerById(order.getCustomerId());
-        notificationService.subscribe(customer.getStakeHolderId(), order.getOrderId());
+        notificationService.subscribeToOrder(customer.getStakeHolderId(), order.getOrderId());
         Vendor vendor = vendorService.getVendorById(order.getVendorId());
-        notificationService.subscribe(vendor.getStakeHolderId(), order.getOrderId());
+        notificationService.subscribeToOrder(vendor.getStakeHolderId(), order.getOrderId());
     }
 
     public void changeStatus(Order order, OrderStatus orderStatus) {

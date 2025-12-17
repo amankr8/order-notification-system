@@ -1,21 +1,21 @@
 package com.flykraft.model.notification;
 
-public class ChannelPref {
-    private Integer channelPrefId;
+public class ChannelSub {
+    private Integer channelSubId;
     private Integer stakeHolderId;
     private Integer channelId;
 
-    public ChannelPref(Integer stakeHolderId, Integer channelId) {
+    public ChannelSub(Integer stakeHolderId, Integer channelId) {
         this.stakeHolderId = stakeHolderId;
         this.channelId = channelId;
     }
 
-    public Integer getChannelPrefId() {
-        return channelPrefId;
+    public Integer getChannelSubId() {
+        return channelSubId;
     }
 
-    public void setChannelPrefId(Integer channelPrefId) {
-        this.channelPrefId = channelPrefId;
+    public void setChannelSubId(Integer channelSubId) {
+        this.channelSubId = channelSubId;
     }
 
     public Integer getStakeHolderId() {

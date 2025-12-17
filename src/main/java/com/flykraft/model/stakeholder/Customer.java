@@ -28,12 +28,12 @@ public class Customer extends StakeHolder implements Notifiable {
     }
 
     @Override
-    public Set<Integer> getDefaultStatusIds() {
-        return StakeHolderCategory.CUSTOMER.getDefaultMsgByStatusIds().keySet();
+    public Set<Integer> getDefaultSubscriptionStatusIds() {
+        return StakeHolderCategory.CUSTOMER.getDefaultSubscriptionMsgByStatusIds().keySet();
     }
 
     @Override
-    public Set<Integer> getDefaultChannelIds() {
-        return StakeHolderCategory.CUSTOMER.getDefaultChannels();
+    public Set<Integer> getDefaultSubscriptionChannelIds() {
+        return StakeHolderCategory.CUSTOMER.getDefaultSubscriptionChannels();
     }
 }

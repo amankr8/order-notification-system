@@ -4,7 +4,7 @@ import java.util.Set;
 
 public interface Notifiable {
 
-    Set<Integer> getDefaultStatusIds();
+    Set<Integer> getDefaultSubscriptionStatusIds();
 
-    Set<Integer> getDefaultChannelIds();
+    Set<Integer> getDefaultSubscriptionChannelIds();
 }

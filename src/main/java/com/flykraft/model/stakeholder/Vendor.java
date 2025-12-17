@@ -28,12 +28,12 @@ public class Vendor extends StakeHolder implements Notifiable {
     }
 
     @Override
-    public Set<Integer> getDefaultStatusIds() {
-        return StakeHolderCategory.VENDOR.getDefaultMsgByStatusIds().keySet();
+    public Set<Integer> getDefaultSubscriptionStatusIds() {
+        return StakeHolderCategory.VENDOR.getDefaultSubscriptionMsgByStatusIds().keySet();
     }
 
     @Override
-    public Set<Integer> getDefaultChannelIds() {
-        return StakeHolderCategory.VENDOR.getDefaultChannels();
+    public Set<Integer> getDefaultSubscriptionChannelIds() {
+        return StakeHolderCategory.VENDOR.getDefaultSubscriptionChannels();
     }
 }

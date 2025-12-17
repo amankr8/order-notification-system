@@ -28,12 +28,12 @@ public class DeliveryPartner extends StakeHolder implements Notifiable {
     }
 
     @Override
-    public Set<Integer> getDefaultStatusIds() {
-        return StakeHolderCategory.DELIVERY_PARTNER.getDefaultMsgByStatusIds().keySet();
+    public Set<Integer> getDefaultSubscriptionStatusIds() {
+        return StakeHolderCategory.DELIVERY_PARTNER.getDefaultSubscriptionMsgByStatusIds().keySet();
     }
 
     @Override
-    public Set<Integer> getDefaultChannelIds() {
-        return StakeHolderCategory.DELIVERY_PARTNER.getDefaultChannels();
+    public Set<Integer> getDefaultSubscriptionChannelIds() {
+        return StakeHolderCategory.DELIVERY_PARTNER.getDefaultSubscriptionChannels();
     }
 }

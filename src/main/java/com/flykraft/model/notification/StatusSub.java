@@ -1,21 +1,21 @@
 package com.flykraft.model.notification;
 
-public class StatusPref {
-    private Integer statusPrefId;
+public class StatusSub {
+    private Integer statusSubId;
     private Integer stakeHolderId;
     private Integer orderStatusId;
 
-    public StatusPref(Integer stakeHolderId, Integer orderStatusId) {
+    public StatusSub(Integer stakeHolderId, Integer orderStatusId) {
         this.stakeHolderId = stakeHolderId;
         this.orderStatusId = orderStatusId;
     }
 
-    public Integer getStatusPrefId() {
-        return statusPrefId;
+    public Integer getStatusSubId() {
+        return statusSubId;
     }
 
-    public void setStatusPrefId(Integer statusPrefId) {
-        this.statusPrefId = statusPrefId;
+    public void setStatusSubId(Integer statusSubId) {
+        this.statusSubId = statusSubId;
     }
 
     public Integer getStakeHolderId() {

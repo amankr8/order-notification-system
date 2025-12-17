@@ -34,7 +34,7 @@ public class NotificationService {
 
     private void addDefaultNotificationMessages() {
         for (StakeHolderCategory stakeHolderCategory : StakeHolderCategory.values()) {
-            for (Map.Entry<Integer, String> entry : stakeHolderCategory.getDefaultMsgByStatusIds().entrySet()) {
+            for (Map.Entry<Integer, String> entry : stakeHolderCategory.getDefaultSubscriptionMsgByStatusIds().entrySet()) {
                 Integer orderStatusId = entry.getKey();
                 String message = entry.getValue();
                 NotifyMsg notifyMsg = new NotifyMsg(stakeHolderCategory.getId(), orderStatusId, message);
@@ -55,39 +55,39 @@ public class NotificationService {
         stakeHolderService.updateStakeHolder(stakeHolder);
     }
 
-    public void addStatusPreferences(Integer stakeHolderId, Set<Integer> orderStatusIds) {
+    public void subscribeToStatuses(Integer stakeHolderId, Set<Integer> orderStatusIds) {
         for (Integer orderStatusId : orderStatusIds) {
-            StatusPref statusPref = new StatusPref(stakeHolderId, orderStatusId);
-            statusPrefRepo.save(statusPref);
+            StatusSub statusSub = new StatusSub(stakeHolderId, orderStatusId);
+            statusPrefRepo.save(statusSub);
         }
     }
 
-    public void removeStatusPreferences(Integer stakeHolderId, Set<Integer> orderStatusIds) {
-        List<StatusPref> statusPrefs = statusPrefRepo.findByStakeHolderId(stakeHolderId);
-        for (StatusPref statusPref : statusPrefs) {
-            if (orderStatusIds.contains(statusPref.getOrderStatusId())) {
-                statusPrefRepo.deleteById(statusPref.getStatusPrefId());
+    public void unsubscribeFromStatuses(Integer stakeHolderId, Set<Integer> orderStatusIds) {
+        List<StatusSub> statusSubs = statusPrefRepo.findByStakeHolderId(stakeHolderId);
+        for (StatusSub statusSub : statusSubs) {
+            if (orderStatusIds.contains(statusSub.getOrderStatusId())) {
+                statusPrefRepo.deleteById(statusSub.getStatusSubId());
             }
         }
     }
 
-    public void addChannelPreferences(Integer stakeHolderId, Set<Integer> channelIds) {
+    public void subscribeToChannels(Integer stakeHolderId, Set<Integer> channelIds) {
         for (Integer channelId : channelIds) {
-            ChannelPref channelPref = new ChannelPref(stakeHolderId, channelId);
-            channelPrefRepo.save(channelPref);
+            ChannelSub channelSub = new ChannelSub(stakeHolderId, channelId);
+            channelPrefRepo.save(channelSub);
         }
     }
 
-    public void removeChannelPreferences(Integer stakeHolderId, Set<Integer> channelIds) {
-        List<ChannelPref> channelPrefs = channelPrefRepo.findByStakeHolderId(stakeHolderId);
-        for (ChannelPref channelPref : channelPrefs) {
-            if (channelIds.contains(channelPref.getChannelId())) {
-                channelPrefRepo.deleteById(channelPref.getChannelPrefId());
+    public void unsubscribeFromChannels(Integer stakeHolderId, Set<Integer> channelIds) {
+        List<ChannelSub> channelSubs = channelPrefRepo.findByStakeHolderId(stakeHolderId);
+        for (ChannelSub channelSub : channelSubs) {
+            if (channelIds.contains(channelSub.getChannelId())) {
+                channelPrefRepo.deleteById(channelSub.getChannelSubId());
             }
         }
     }
 
-    public void updateStatusUpdateMessageForCategory(Integer categoryId, Integer statusId, String message) {
+    public void updateStatusMessageForCategory(Integer categoryId, Integer statusId, String message) {
         List<NotifyMsg> msgsByCategory = notifyMsgRepo.findByCategoryId(categoryId);
         for (NotifyMsg notifyMsg : msgsByCategory) {
             if (notifyMsg.getOrderStatusId().equals(statusId)) {
@@ -97,12 +97,12 @@ public class NotificationService {
         }
     }
 
-    public void subscribe(Integer stakeHolderId, Integer orderId) {
+    public void subscribeToOrder(Integer stakeHolderId, Integer orderId) {
         var notifySub = new NotifySub(stakeHolderId, orderId);
         notifySubRepo.save(notifySub);
     }
 
-    public void unsubscribe(Integer stakeHolderId, Integer orderId) {
+    public void unsubscribeFromOrder(Integer stakeHolderId, Integer orderId) {
         List<NotifySub> subs = notifySubRepo.findByOrderId(orderId);
         for (var sub : subs) {
             if (sub.getStakeHolderId().equals(stakeHolderId)) {
@@ -115,9 +115,9 @@ public class NotificationService {
         List<NotifySub> subs = notifySubRepo.findByOrderId(order.getOrderId());
         for (NotifySub sub : subs) {
             StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
-            if (stakeHolder.hasOptedInForNotifications() && validatePreferenceByStakeHolder(stakeHolder, order.getStatusId())) {
+            if (stakeHolder.hasOptedInForNotifications() && validateStatusSubscriptionByStakeHolder(stakeHolder, order.getStatusId())) {
                 String message = getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), order.getStatusId());
-                List<Channel> channels = getPreferredChannelsByStakeHolderId(sub.getStakeHolderId());
+                List<Channel> channels = getChannelSubscriptionsByStakeHolderId(sub.getStakeHolderId());
                 for (Channel channel : channels) {
                     channel.getService().sendNotification("Hi " + stakeHolder.getStakeHolderName() + "! " + message);
                 }
@@ -125,21 +125,21 @@ public class NotificationService {
         }
     }
 
-    private boolean validatePreferenceByStakeHolder(StakeHolder stakeHolder, Integer orderStatusId) {
-        List<StatusPref> statusPrefs = statusPrefRepo.findByStakeHolderId(stakeHolder.getStakeHolderId());
-        for (StatusPref statusPref : statusPrefs) {
-            if (statusPref.getOrderStatusId().equals(orderStatusId)) {
+    private boolean validateStatusSubscriptionByStakeHolder(StakeHolder stakeHolder, Integer orderStatusId) {
+        List<StatusSub> statusSubs = statusPrefRepo.findByStakeHolderId(stakeHolder.getStakeHolderId());
+        for (StatusSub statusSub : statusSubs) {
+            if (statusSub.getOrderStatusId().equals(orderStatusId)) {
                 return true;
             }
         }
         return false;
     }
 
-    private List<Channel> getPreferredChannelsByStakeHolderId(Integer stakeHolderId) {
-        List<ChannelPref> channelPrefs = channelPrefRepo.findByStakeHolderId(stakeHolderId);
+    private List<Channel> getChannelSubscriptionsByStakeHolderId(Integer stakeHolderId) {
+        List<ChannelSub> channelSubs = channelPrefRepo.findByStakeHolderId(stakeHolderId);
         List<Channel> channels = new ArrayList<>();
-        for (ChannelPref channelPref : channelPrefs) {
-            channels.add(Channel.getChannelById(channelPref.getChannelId()));
+        for (ChannelSub channelSub : channelSubs) {
+            channels.add(Channel.getChannelById(channelSub.getChannelId()));
         }
         return channels;
     }

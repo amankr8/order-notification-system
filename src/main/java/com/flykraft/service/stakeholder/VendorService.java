@@ -1,7 +1,6 @@
 package com.flykraft.service.stakeholder;
 
 import com.flykraft.model.stakeholder.StakeHolder;
-import com.flykraft.model.stakeholder.StakeHolderCategory;
 import com.flykraft.model.stakeholder.Vendor;
 import com.flykraft.repository.stakeholder.VendorRepo;
 import com.flykraft.service.notification.NotificationService;
@@ -26,8 +25,8 @@ public class VendorService {
         StakeHolder stakeHolder = new StakeHolder(vendor.getVendorName(), vendor.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         vendor.setStakeHolderId(stakeHolder.getStakeHolderId());
-        notificationService.addStatusPreferences(vendor.getStakeHolderId(), vendor.getDefaultStatusIds());
-        notificationService.addChannelPreferences(vendor.getStakeHolderId(), vendor.getDefaultChannelIds());
+        notificationService.subscribeToStatuses(vendor.getStakeHolderId(), vendor.getDefaultSubscriptionStatusIds());
+        notificationService.subscribeToChannels(vendor.getStakeHolderId(), vendor.getDefaultSubscriptionChannelIds());
         return vendorRepo.save(vendor);
     }
 }

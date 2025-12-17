@@ -25,8 +25,8 @@ public class DeliveryPartnerService {
         StakeHolder stakeHolder = new StakeHolder(partner.getPartnerName(), partner.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         partner.setStakeHolderId(stakeHolder.getStakeHolderId());
-        notificationService.addStatusPreferences(partner.getStakeHolderId(), partner.getDefaultStatusIds());
-        notificationService.addChannelPreferences(partner.getStakeHolderId(), partner.getDefaultChannelIds());
+        notificationService.subscribeToStatuses(partner.getStakeHolderId(), partner.getDefaultSubscriptionStatusIds());
+        notificationService.subscribeToChannels(partner.getStakeHolderId(), partner.getDefaultSubscriptionChannelIds());
         return deliveryPartnerRepo.save(partner);
     }
 }

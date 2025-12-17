@@ -25,8 +25,8 @@ public class CustomerService {
         StakeHolder stakeHolder = new StakeHolder(customer.getCustomerName(), customer.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         customer.setStakeHolderId(stakeHolder.getStakeHolderId());
-        notificationService.addStatusPreferences(customer.getStakeHolderId(), customer.getDefaultStatusIds());
-        notificationService.addChannelPreferences(customer.getStakeHolderId(), customer.getDefaultChannelIds());
+        notificationService.subscribeToStatuses(customer.getStakeHolderId(), customer.getDefaultSubscriptionStatusIds());
+        notificationService.subscribeToChannels(customer.getStakeHolderId(), customer.getDefaultSubscriptionChannelIds());
         return customerRepo.save(customer);
     }
 }
