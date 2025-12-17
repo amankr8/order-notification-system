@@ -24,7 +24,7 @@ public class CustomerService {
     }
 
     public Customer createCustomer(Customer customer) {
-        StakeHolder stakeHolder = new StakeHolder(customer.getCustomerName(), customer.getCategoryId());
+        StakeHolder stakeHolder = new StakeHolder(customer.getCustomerName(), customer.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         customer.setStakeHolderId(stakeHolder.getStakeHolderId());
         notificationService.addStatusPreferences(customer.getStakeHolderId(), Customer.DEFAULT_MSG_BY_STATUS.keySet());
