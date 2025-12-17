@@ -1,9 +1,7 @@
 package com.flykraft.service.stakeholder;
 
-import com.flykraft.model.notification.Channel;
 import com.flykraft.model.stakeholder.Customer;
 import com.flykraft.model.stakeholder.StakeHolder;
-import com.flykraft.model.stakeholder.StakeHolderCategory;
 import com.flykraft.repository.stakeholder.CustomerRepo;
 import com.flykraft.service.notification.NotificationService;
 
@@ -27,8 +25,8 @@ public class CustomerService {
         StakeHolder stakeHolder = new StakeHolder(customer.getCustomerName(), customer.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         customer.setStakeHolderId(stakeHolder.getStakeHolderId());
-        notificationService.addStatusPreferences(customer.getStakeHolderId(), Customer.DEFAULT_MSG_BY_STATUS.keySet());
-        notificationService.addChannelPreferences(customer.getStakeHolderId(), Customer.DEFAULT_CHANNELS);
+        notificationService.addStatusPreferences(customer.getStakeHolderId(), customer.getDefaultStatusIds());
+        notificationService.addChannelPreferences(customer.getStakeHolderId(), customer.getDefaultChannelIds());
         return customerRepo.save(customer);
     }
 }

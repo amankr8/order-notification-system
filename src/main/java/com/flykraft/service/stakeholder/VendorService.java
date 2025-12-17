@@ -22,12 +22,12 @@ public class VendorService {
                 .orElseThrow(() -> new RuntimeException("Stakeholder does not exist."));
     }
 
-    public Vendor createVendor(Vendor customer) {
-        StakeHolder stakeHolder = new StakeHolder(customer.getVendorName(), customer.getStakeHolderCategoryId());
+    public Vendor createVendor(Vendor vendor) {
+        StakeHolder stakeHolder = new StakeHolder(vendor.getVendorName(), vendor.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
-        customer.setStakeHolderId(stakeHolder.getStakeHolderId());
-        notificationService.addStatusPreferences(customer.getStakeHolderId(), Vendor.DEFAULT_MSG_BY_STATUS.keySet());
-        notificationService.addChannelPreferences(customer.getStakeHolderId(), Vendor.DEFAULT_CHANNELS);
-        return vendorRepo.save(customer);
+        vendor.setStakeHolderId(stakeHolder.getStakeHolderId());
+        notificationService.addStatusPreferences(vendor.getStakeHolderId(), vendor.getDefaultStatusIds());
+        notificationService.addChannelPreferences(vendor.getStakeHolderId(), vendor.getDefaultChannelIds());
+        return vendorRepo.save(vendor);
     }
 }

@@ -3,12 +3,12 @@ package com.flykraft.model.stakeholder;
 public class StakeHolder {
     private Integer stakeHolderId;
     private String stakeHolderName;
-    private Integer categoryId;
+    private Integer stakeHolderCategoryId;
     private boolean optedInForNotifications;
 
-    public StakeHolder(String stakeHolderName, Integer categoryId) {
+    public StakeHolder(String stakeHolderName, Integer stakeHolderCategoryId) {
         this.stakeHolderName = stakeHolderName;
-        this.categoryId = categoryId;
+        this.stakeHolderCategoryId = stakeHolderCategoryId;
         this.optedInForNotifications = true;
     }
 
@@ -28,12 +28,12 @@ public class StakeHolder {
         this.stakeHolderName = stakeHolderName;
     }
 
-    public Integer getCategoryId() {
-        return categoryId;
+    public Integer getStakeHolderCategoryId() {
+        return stakeHolderCategoryId;
     }
 
-    public void setCategoryId(Integer categoryId) {
-        this.categoryId = categoryId;
+    public void setStakeHolderCategoryId(Integer stakeHolderCategoryId) {
+        this.stakeHolderCategoryId = stakeHolderCategoryId;
     }
 
     public boolean hasOptedInForNotifications() {

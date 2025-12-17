@@ -34,7 +34,7 @@ public class NotificationService {
 
     private void addDefaultNotificationMessages() {
         for (StakeHolderCategory stakeHolderCategory : StakeHolderCategory.values()) {
-            for (Map.Entry<Integer, String> entry : stakeHolderCategory.getDefaultMsgByStatus().entrySet()) {
+            for (Map.Entry<Integer, String> entry : stakeHolderCategory.getDefaultMsgByStatusIds().entrySet()) {
                 Integer orderStatusId = entry.getKey();
                 String message = entry.getValue();
                 NotifyMsg notifyMsg = new NotifyMsg(stakeHolderCategory.getId(), orderStatusId, message);
@@ -116,7 +116,7 @@ public class NotificationService {
         for (NotifySub sub : subs) {
             StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
             if (stakeHolder.hasOptedInForNotifications() && validatePreferenceByStakeHolder(stakeHolder, order.getStatusId())) {
-                String message = getMessageByCategoryAndStatusId(stakeHolder.getCategoryId(), order.getStatusId());
+                String message = getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), order.getStatusId());
                 List<Channel> channels = getPreferredChannelsByStakeHolderId(sub.getStakeHolderId());
                 for (Channel channel : channels) {
                     channel.getService().sendNotification("Hi " + stakeHolder.getStakeHolderName() + "! " + message);

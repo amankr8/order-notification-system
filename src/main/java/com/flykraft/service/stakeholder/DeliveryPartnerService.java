@@ -2,7 +2,6 @@ package com.flykraft.service.stakeholder;
 
 import com.flykraft.model.stakeholder.DeliveryPartner;
 import com.flykraft.model.stakeholder.StakeHolder;
-import com.flykraft.model.stakeholder.StakeHolderCategory;
 import com.flykraft.repository.stakeholder.DeliveryPartnerRepo;
 import com.flykraft.service.notification.NotificationService;
 
@@ -26,8 +25,8 @@ public class DeliveryPartnerService {
         StakeHolder stakeHolder = new StakeHolder(partner.getPartnerName(), partner.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         partner.setStakeHolderId(stakeHolder.getStakeHolderId());
-        notificationService.addStatusPreferences(partner.getStakeHolderId(), DeliveryPartner.DEFAULT_MSG_BY_STATUS.keySet());
-        notificationService.addChannelPreferences(partner.getStakeHolderId(), DeliveryPartner.DEFAULT_CHANNELS);
+        notificationService.addStatusPreferences(partner.getStakeHolderId(), partner.getDefaultStatusIds());
+        notificationService.addChannelPreferences(partner.getStakeHolderId(), partner.getDefaultChannelIds());
         return deliveryPartnerRepo.save(partner);
     }
 }
