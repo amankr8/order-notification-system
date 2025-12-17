@@ -23,8 +23,6 @@ public class DemoRunner {
         Vendor vendor = vendorService.createVendor(new Vendor("Best Vendor"));
         DeliveryPartner deliveryPartner = deliveryPartnerService.createPartner(new DeliveryPartner("Ekart Logistics"));
 
-        notificationService.updateStatusUpdateMessageForCategory(StakeHolderCategory.CUSTOMER.getId(), OrderStatus.PLACED.getId(), "hello custom is placed");
-
         notificationService.removeStatusPreferences(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
         System.out.println("\n" + customer1.getCustomerName() + " has removed " + OrderStatus.DELIVERED.getName() + " status from his update preferences");
 
