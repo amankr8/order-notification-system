@@ -23,7 +23,7 @@ public class DeliveryPartnerService {
     }
 
     public DeliveryPartner createPartner(DeliveryPartner partner) {
-        StakeHolder stakeHolder = new StakeHolder(partner.getPartnerName(), StakeHolderCategory.DELIVERY_PARTNER.getId());
+        StakeHolder stakeHolder = new StakeHolder(partner.getPartnerName(), partner.getCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         partner.setStakeHolderId(stakeHolder.getStakeHolderId());
         notificationService.addStatusPreferences(partner.getStakeHolderId(), DeliveryPartner.DEFAULT_MSG_BY_STATUS.keySet());
