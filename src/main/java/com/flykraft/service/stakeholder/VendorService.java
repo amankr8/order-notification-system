@@ -23,7 +23,7 @@ public class VendorService {
     }
 
     public Vendor createVendor(Vendor customer) {
-        StakeHolder stakeHolder = new StakeHolder(customer.getVendorName(), StakeHolderCategory.CUSTOMER.getId());
+        StakeHolder stakeHolder = new StakeHolder(customer.getVendorName(), StakeHolderCategory.VENDOR.getId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         customer.setStakeHolderId(stakeHolder.getStakeHolderId());
         notificationService.addStatusPreferences(customer.getStakeHolderId(), Vendor.DEFAULT_MSG_BY_STATUS.keySet());

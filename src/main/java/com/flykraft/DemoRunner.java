@@ -5,6 +5,7 @@ import com.flykraft.model.order.Order;
 import com.flykraft.model.order.OrderStatus;
 import com.flykraft.model.stakeholder.Customer;
 import com.flykraft.model.stakeholder.DeliveryPartner;
+import com.flykraft.model.stakeholder.StakeHolderCategory;
 import com.flykraft.model.stakeholder.Vendor;
 import com.flykraft.service.notification.NotificationService;
 import com.flykraft.service.order.OrderService;
@@ -22,8 +23,7 @@ public class DemoRunner {
         Vendor vendor = vendorService.createVendor(new Vendor("Best Vendor"));
         DeliveryPartner deliveryPartner = deliveryPartnerService.createPartner(new DeliveryPartner("Ekart Logistics"));
 
-        notificationService.removeChannelPreferences(customer1.getStakeHolderId(), Set.of(Channel.EMAIL.getId()));
-        System.out.println("\n" + customer1.getCustomerName() + " has removed " + Channel.EMAIL.getName() + " from his communication preferences");
+        notificationService.updateStatusUpdateMessageForCategory(StakeHolderCategory.CUSTOMER.getId(), OrderStatus.PLACED.getId(), "hello custom is placed");
 
         notificationService.removeStatusPreferences(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
         System.out.println("\n" + customer1.getCustomerName() + " has removed " + OrderStatus.DELIVERED.getName() + " status from his update preferences");
@@ -31,12 +31,6 @@ public class DemoRunner {
         System.out.println("\nCreating an order...");
         Order order1 = orderService.createOrder(new Order(customer1.getCustomerId(), vendor.getVendorId()));
         Order order2 = orderService.createOrder(new Order(customer2.getCustomerId(), vendor.getVendorId()));
-
-        notificationService.optOutOfNotifications(customer1.getStakeHolderId());
-        System.out.println("\n" + customer1.getCustomerName() + " has opted out of notifications.");
-
-        notificationService.addChannelPreferences(customer1.getStakeHolderId(), Set.of(Channel.EMAIL.getId()));
-        System.out.println("\n" + customer1.getCustomerName() + " has added " + Channel.EMAIL.getName() + " to his communication preferences");
 
         notificationService.addStatusPreferences(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
         System.out.println("\n" + customer1.getCustomerName() + " has added " + OrderStatus.DELIVERED.getName() + " status to his update preferences");
@@ -47,8 +41,7 @@ public class DemoRunner {
         System.out.println("\nShipping the order...");
         orderService.changeStatus(order1, OrderStatus.SHIPPED);
 
-        notificationService.optInForNotifications(customer1.getStakeHolderId());
-        System.out.println("\n" + customer1.getCustomerName() + " has opted in for notifications.");
+        notificationService.unsubscribe(customer1.getStakeHolderId(), order1.getOrderId());
 
         System.out.println("\nDelivering the order...");
         orderService.changeStatus(order1, OrderStatus.DELIVERED);

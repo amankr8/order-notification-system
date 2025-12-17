@@ -2,7 +2,6 @@ package com.flykraft.service.notification;
 
 import com.flykraft.model.notification.*;
 import com.flykraft.model.order.Order;
-import com.flykraft.model.order.OrderStatus;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.model.stakeholder.StakeHolderCategory;
 import com.flykraft.repository.notification.ChannelPrefRepo;
@@ -88,6 +87,16 @@ public class NotificationService {
         }
     }
 
+    public void updateStatusUpdateMessageForCategory(Integer categoryId, Integer statusId, String message) {
+        List<NotifyMsg> msgsByCategory = notifyMsgRepo.findByCategoryId(categoryId);
+        for (NotifyMsg notifyMsg : msgsByCategory) {
+            if (notifyMsg.getOrderStatusId().equals(statusId)) {
+                notifyMsg.setMessage(message);
+                notifyMsgRepo.save(notifyMsg);
+            }
+        }
+    }
+
     public void subscribe(Integer stakeHolderId, Integer orderId) {
         var notifySub = new NotifySub(stakeHolderId, orderId);
         notifySubRepo.save(notifySub);
@@ -107,10 +116,10 @@ public class NotificationService {
         for (NotifySub sub : subs) {
             StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
             if (stakeHolder.hasOptedInForNotifications() && validatePreferenceByStakeHolder(stakeHolder, order.getStatusId())) {
-                String message = getMessageByStakeHolderAndStatusId(stakeHolder, order.getStatusId());
+                String message = getMessageByCategoryAndStatusId(stakeHolder.getCategoryId(), order.getStatusId());
                 List<Channel> channels = getPreferredChannelsByStakeHolderId(sub.getStakeHolderId());
                 for (Channel channel : channels) {
-                    channel.getService().sendNotification(message);
+                    channel.getService().sendNotification("Hi " + stakeHolder.getStakeHolderName() + "! " + message);
                 }
             }
         }
@@ -135,11 +144,11 @@ public class NotificationService {
         return channels;
     }
 
-    private String getMessageByStakeHolderAndStatusId(StakeHolder stakeHolder, Integer statusId) {
-        List<NotifyMsg> notifyMsgs = notifyMsgRepo.findByCategoryId(stakeHolder.getCategoryId());
+    private String getMessageByCategoryAndStatusId(Integer categoryId, Integer statusId) {
+        List<NotifyMsg> notifyMsgs = notifyMsgRepo.findByCategoryId(categoryId);
         for (NotifyMsg notifyMsg : notifyMsgs) {
             if (notifyMsg.getOrderStatusId().equals(statusId)) {
-                return "Hi " + stakeHolder.getStakeHolderName() + "! " + notifyMsg.getMessage();
+                return notifyMsg.getMessage();
             }
         }
 
