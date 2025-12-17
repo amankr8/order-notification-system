@@ -11,9 +11,9 @@ public enum StakeHolderCategory {
 
     private Integer id;
     private String name;
-    private Map<OrderStatus, String> defaultMsgByStatus;
+    private Map<Integer, String> defaultMsgByStatus;
 
-    StakeHolderCategory(Integer id, String name, Map<OrderStatus, String> defaultMsgByStatus) {
+    StakeHolderCategory(Integer id, String name, Map<Integer, String> defaultMsgByStatus) {
         this.id = id;
         this.name = name;
         this.defaultMsgByStatus = defaultMsgByStatus;
@@ -35,11 +35,11 @@ public enum StakeHolderCategory {
         this.name = name;
     }
 
-    public Map<OrderStatus, String> getDefaultMsgByStatus() {
+    public Map<Integer, String> getDefaultMsgByStatus() {
         return defaultMsgByStatus;
     }
 
-    public void setDefaultMsgByStatus(Map<OrderStatus, String> defaultMsgByStatus) {
+    public void setDefaultMsgByStatus(Map<Integer, String> defaultMsgByStatus) {
         this.defaultMsgByStatus = defaultMsgByStatus;
     }
 }

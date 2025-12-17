@@ -9,12 +9,12 @@ import java.util.Set;
 public class Vendor extends StakeHolder {
     private Integer vendorId;
     private String vendorName;
-    public static final Map<OrderStatus, String> DEFAULT_MSG_BY_STATUS = Map.of(
-            OrderStatus.PLACED, "An order has been placed to your store."
+    public static final Map<Integer, String> DEFAULT_MSG_BY_STATUS = Map.of(
+            OrderStatus.PLACED.getId(), "An order has been placed to your store."
     );
-    public static final Set<Channel> DEFAULT_CHANNELS = Set.of(
-            Channel.EMAIL,
-            Channel.SMS
+    public static final Set<Integer> DEFAULT_CHANNELS = Set.of(
+            Channel.EMAIL.getId(),
+            Channel.SMS.getId()
     );
 
     public Vendor(String vendorName) {

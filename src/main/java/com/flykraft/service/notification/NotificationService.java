@@ -35,10 +35,10 @@ public class NotificationService {
 
     private void addDefaultNotificationMessages() {
         for (StakeHolderCategory stakeHolderCategory : StakeHolderCategory.values()) {
-            for (Map.Entry<OrderStatus, String> entry : stakeHolderCategory.getDefaultMsgByStatus().entrySet()) {
-                OrderStatus orderStatus = entry.getKey();
+            for (Map.Entry<Integer, String> entry : stakeHolderCategory.getDefaultMsgByStatus().entrySet()) {
+                Integer orderStatusId = entry.getKey();
                 String message = entry.getValue();
-                NotifyMsg notifyMsg = new NotifyMsg(stakeHolderCategory.getId(), orderStatus.getId(), message);
+                NotifyMsg notifyMsg = new NotifyMsg(stakeHolderCategory.getId(), orderStatusId, message);
                 notifyMsgRepo.save(notifyMsg);
             }
         }
@@ -56,17 +56,35 @@ public class NotificationService {
         stakeHolderService.updateStakeHolder(stakeHolder);
     }
 
-    public void addStatusPreferences(Integer stakeHolderId, Set<OrderStatus> orderStatuses) {
-        for (OrderStatus orderStatus : orderStatuses) {
-            StatusPref statusPref = new StatusPref(stakeHolderId, orderStatus.getId());
+    public void addStatusPreferences(Integer stakeHolderId, Set<Integer> orderStatusIds) {
+        for (Integer orderStatusId : orderStatusIds) {
+            StatusPref statusPref = new StatusPref(stakeHolderId, orderStatusId);
             statusPrefRepo.save(statusPref);
         }
     }
 
-    public void addChannelPreferences(Integer stakeHolderId, Set<Channel> channels) {
-        for (Channel channel : channels) {
-            ChannelPref channelPref = new ChannelPref(stakeHolderId, channel.getId());
+    public void removeStatusPreferences(Integer stakeHolderId, Set<Integer> orderStatusIds) {
+        List<StatusPref> statusPrefs = statusPrefRepo.findByStakeHolderId(stakeHolderId);
+        for (StatusPref statusPref : statusPrefs) {
+            if (orderStatusIds.contains(statusPref.getOrderStatusId())) {
+                statusPrefRepo.deleteById(statusPref.getStatusPrefId());
+            }
+        }
+    }
+
+    public void addChannelPreferences(Integer stakeHolderId, Set<Integer> channelIds) {
+        for (Integer channelId : channelIds) {
+            ChannelPref channelPref = new ChannelPref(stakeHolderId, channelId);
             channelPrefRepo.save(channelPref);
+        }
+    }
+
+    public void removeChannelPreferences(Integer stakeHolderId, Set<Integer> channelIds) {
+        List<ChannelPref> channelPrefs = channelPrefRepo.findByStakeHolderId(stakeHolderId);
+        for (ChannelPref channelPref : channelPrefs) {
+            if (channelIds.contains(channelPref.getChannelId())) {
+                channelPrefRepo.deleteById(channelPref.getChannelPrefId());
+            }
         }
     }
 

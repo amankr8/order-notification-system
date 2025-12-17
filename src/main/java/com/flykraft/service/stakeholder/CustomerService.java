@@ -1,5 +1,6 @@
 package com.flykraft.service.stakeholder;
 
+import com.flykraft.model.notification.Channel;
 import com.flykraft.model.stakeholder.Customer;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.model.stakeholder.StakeHolderCategory;

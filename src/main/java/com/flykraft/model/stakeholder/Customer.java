@@ -9,14 +9,14 @@ import java.util.Set;
 public class Customer extends StakeHolder {
     private Integer customerId;
     private String customerName;
-    public static final Map<OrderStatus, String> DEFAULT_MSG_BY_STATUS = Map.of(
-        OrderStatus.PLACED, "Your order has been placed successfully.",
-        OrderStatus.SHIPPED, "Your order has been shipped.",
-        OrderStatus.DELIVERED, "Your order has been delivered."
+    public static final Map<Integer, String> DEFAULT_MSG_BY_STATUS = Map.of(
+        OrderStatus.PLACED.getId(), "Your order has been placed successfully.",
+        OrderStatus.SHIPPED.getId(), "Your order has been shipped.",
+        OrderStatus.DELIVERED.getId(), "Your order has been delivered."
     );
-    public static final Set<Channel> DEFAULT_CHANNELS = Set.of(
-        Channel.EMAIL,
-        Channel.SMS
+    public static final Set<Integer> DEFAULT_CHANNELS = Set.of(
+        Channel.EMAIL.getId(),
+        Channel.SMS.getId()
     );
 
     public Customer(String customerName) {

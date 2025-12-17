@@ -9,12 +9,12 @@ import java.util.Set;
 public class DeliveryPartner extends StakeHolder {
     private Integer partnerId;
     private String partnerName;
-    public static final Map<OrderStatus, String> DEFAULT_MSG_BY_STATUS = Map.of(
-            OrderStatus.DELIVERED, "The order has been delivered to the customer successfully."
+    public static final Map<Integer, String> DEFAULT_MSG_BY_STATUS = Map.of(
+            OrderStatus.DELIVERED.getId(), "The order has been delivered to the customer successfully."
     );
-    public static final Set<Channel> DEFAULT_CHANNELS = Set.of(
-            Channel.EMAIL,
-            Channel.SMS
+    public static final Set<Integer> DEFAULT_CHANNELS = Set.of(
+            Channel.EMAIL.getId(),
+            Channel.SMS.getId()
     );
 
     public DeliveryPartner(String partnerName) {
