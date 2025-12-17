@@ -61,21 +61,21 @@ public enum StakeHolderCategory {
 
     private static Map<Integer, String> getDefaultMsgByStatusForCustomer() {
         return Map.of(
-                OrderStatus.PLACED.getId(), "Your order has been placed successfully.",
-                OrderStatus.SHIPPED.getId(), "Your order has been shipped.",
-                OrderStatus.DELIVERED.getId(), "Your order has been delivered."
+            OrderStatus.PLACED.getId(), "Your order was placed successfully.",
+            OrderStatus.SHIPPED.getId(), "Your order was shipped.",
+            OrderStatus.DELIVERED.getId(), "Your order was delivered."
         );
     }
 
     private static Map<Integer, String> getDefaultMsgByStatusForVendor() {
         return Map.of(
-                OrderStatus.PLACED.getId(), "An order has been placed to your store."
+            OrderStatus.PLACED.getId(), "An order was placed to your store."
         );
     }
 
     private static Map<Integer, String> getDefaultMsgByStatusForPartner() {
         return Map.of(
-                OrderStatus.DELIVERED.getId(), "The order has been delivered to the customer successfully."
+            OrderStatus.DELIVERED.getId(), "The order was delivered to the customer successfully."
         );
     }
 }
