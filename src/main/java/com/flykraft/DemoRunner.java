@@ -33,7 +33,7 @@ public class DemoRunner {
         notificationService.addStatusPreferences(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
         System.out.println("\n" + customer1.getCustomerName() + " has added " + OrderStatus.DELIVERED.getName() + " status to his update preferences");
 
-        orderService.assignDeliveryPartner(order1.getOrderId(), deliveryPartner);
+        orderService.assignDeliveryPartner(order1.getOrderId(), deliveryPartner.getPartnerId());
         System.out.println("\nDelivery Partner assigned -> " + deliveryPartner.getPartnerName());
 
         System.out.println("\nShipping the order...");

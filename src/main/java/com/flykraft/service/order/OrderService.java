@@ -8,6 +8,7 @@ import com.flykraft.model.stakeholder.Vendor;
 import com.flykraft.repository.order.OrderRepo;
 import com.flykraft.service.notification.NotificationService;
 import com.flykraft.service.stakeholder.CustomerService;
+import com.flykraft.service.stakeholder.DeliveryPartnerService;
 import com.flykraft.service.stakeholder.VendorService;
 
 public class OrderService {
@@ -15,12 +16,14 @@ public class OrderService {
     private final OrderRepo orderRepo;
     private final CustomerService customerService;
     private final VendorService vendorService;
+    private final DeliveryPartnerService deliveryPartnerService;
     private final NotificationService notificationService;
 
-    public OrderService(OrderRepo orderRepo, CustomerService customerService, VendorService vendorService, NotificationService notificationService) {
+    public OrderService(OrderRepo orderRepo, CustomerService customerService, VendorService vendorService, DeliveryPartnerService deliveryPartnerService, NotificationService notificationService) {
         this.orderRepo = orderRepo;
         this.customerService = customerService;
         this.vendorService = vendorService;
+        this.deliveryPartnerService = deliveryPartnerService;
         this.notificationService = notificationService;
     }
 
@@ -36,9 +39,10 @@ public class OrderService {
         return newOrder;
     }
 
-    public void assignDeliveryPartner(Integer orderId, DeliveryPartner deliveryPartner) {
+    public void assignDeliveryPartner(Integer orderId, Integer partnerId) {
         Order order = getOrderById(orderId);
-        order.setPartnerId(deliveryPartner.getPartnerId());
+        order.setPartnerId(partnerId);
+        DeliveryPartner deliveryPartner = deliveryPartnerService.getPartnerById(partnerId);
         notificationService.subscribe(deliveryPartner.getStakeHolderId(), order.getOrderId());
         orderRepo.save(order);
     }

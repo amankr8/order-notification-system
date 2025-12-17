@@ -38,7 +38,7 @@ public class Main {
         VendorService vendorService = new VendorService(vendorRepo, stakeHolderService, notificationService);
         DeliveryPartnerService deliveryPartnerService = new DeliveryPartnerService(deliveryPartnerRepo, stakeHolderService, notificationService);
 
-        OrderService orderService = new OrderService(orderRepo, customerService, vendorService, notificationService);
+        OrderService orderService = new OrderService(orderRepo, customerService, vendorService, deliveryPartnerService, notificationService);
 
         DemoRunner.runDemo(stakeHolderService, customerService, vendorService, deliveryPartnerService, orderService, notificationService);
     }
