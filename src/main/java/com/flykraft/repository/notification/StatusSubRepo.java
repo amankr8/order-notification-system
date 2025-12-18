@@ -38,10 +38,10 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
         lock.writeLock().lock();
         try {
             StatusSub statusSub = clone(entity);
+            validateConstraints(statusSub);
             if (statusSub.getStatusSubId() == null) {
                 statusSub.setStatusSubId(nextId++);
             }
-            validateConstraint(statusSub);
             statusSubData.put(statusSub.getStatusSubId(), statusSub);
             constraintsMap.put(getConstraintId(statusSub), statusSub.getStatusSubId());
             return clone(statusSub);
@@ -50,9 +50,9 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
         }
     }
 
-    private void validateConstraint(StatusSub entity) {
-        String constraintId = getConstraintId(entity);
-        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getStatusSubId())) {
+    private void validateConstraints(StatusSub statusSub) {
+        String constraintId = getConstraintId(statusSub);
+        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(statusSub.getStatusSubId())) {
             throw new DataConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
         }
     }

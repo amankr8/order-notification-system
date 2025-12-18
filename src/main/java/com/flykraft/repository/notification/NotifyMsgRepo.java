@@ -38,10 +38,10 @@ public class NotifyMsgRepo implements Repository<Integer, NotifyMsg> {
         lock.writeLock().lock();
         try {
             NotifyMsg notifyMsg = clone(entity);
+            validateConstraints(notifyMsg);
             if (notifyMsg.getNotifyMsgId() == null) {
                 notifyMsg.setNotifyMsgId(nextId++);
             }
-            validateConstraint(notifyMsg);
             notifyMsgData.put(notifyMsg.getNotifyMsgId(), notifyMsg);
             constraintsMap.putIfAbsent(getConstraintId(notifyMsg), notifyMsg.getNotifyMsgId());
             return clone(notifyMsg);
@@ -50,9 +50,9 @@ public class NotifyMsgRepo implements Repository<Integer, NotifyMsg> {
         }
     }
 
-    private void validateConstraint(NotifyMsg entity) {
-        String constraintId = getConstraintId(entity);
-        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getNotifyMsgId())) {
+    private void validateConstraints(NotifyMsg notifyMsg) {
+        String constraintId = getConstraintId(notifyMsg);
+        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(notifyMsg.getNotifyMsgId())) {
             throw new DataConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
         }
     }

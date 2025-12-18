@@ -38,10 +38,10 @@ public class ChannelSubRepo implements Repository<Integer, ChannelSub> {
         lock.writeLock().lock();
         try {
             ChannelSub channelSub = clone(entity);
+            validateConstraints(channelSub);
             if (channelSub.getChannelSubId() == null) {
                 channelSub.setChannelSubId(nextId++);
             }
-            validateConstraint(channelSub);
             channelSubData.put(channelSub.getChannelSubId(), channelSub);
             constraintsMap.putIfAbsent(getConstraintId(channelSub), channelSub.getChannelSubId());
             return clone(channelSub);
@@ -50,9 +50,9 @@ public class ChannelSubRepo implements Repository<Integer, ChannelSub> {
         }
     }
 
-    private void validateConstraint(ChannelSub entity) {
-        String constraintId = getConstraintId(entity);
-        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getChannelSubId())) {
+    private void validateConstraints(ChannelSub channelSub) {
+        String constraintId = getConstraintId(channelSub);
+        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(channelSub.getChannelSubId())) {
             throw new DataConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
         }
     }

@@ -1,5 +1,6 @@
 package com.flykraft.repository.stakeholder;
 
+import com.flykraft.exception.DataConstraintViolationException;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.repository.Repository;
 
@@ -36,6 +37,7 @@ public class StakeHolderRepo implements Repository<Integer, StakeHolder> {
         lock.writeLock().lock();
         try {
             StakeHolder stakeHolder = clone(entity);
+            validateConstraints(stakeHolder);
             if (stakeHolder.getStakeHolderId() == null) {
                 stakeHolder.setStakeHolderId(nextId++);
             }
@@ -43,6 +45,12 @@ public class StakeHolderRepo implements Repository<Integer, StakeHolder> {
             return clone(stakeHolder);
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    private void validateConstraints(StakeHolder stakeHolder) {
+        if (stakeHolder.getStakeHolderCategoryId() == null) {
+            throw new DataConstraintViolationException("StakeHolderCategory Id cannot be null");
         }
     }
 

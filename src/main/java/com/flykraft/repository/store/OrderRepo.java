@@ -1,5 +1,6 @@
 package com.flykraft.repository.store;
 
+import com.flykraft.exception.DataConstraintViolationException;
 import com.flykraft.model.store.Order;
 import com.flykraft.repository.Repository;
 
@@ -36,6 +37,7 @@ public class OrderRepo implements Repository<Integer, Order> {
         lock.writeLock().lock();
         try {
             Order order = clone(entity);
+            validateConstraints(order);
             if (order.getOrderId() == null) {
                 order.setOrderId(nextId++);
             }
@@ -43,6 +45,12 @@ public class OrderRepo implements Repository<Integer, Order> {
             return clone(order);
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    private void validateConstraints(Order order) {
+        if (order.getCustomerId() == null || order.getVendorId() == null || order.getStatusId() == null) {
+            throw new DataConstraintViolationException("Customer Id, Vendor Id, and Status Id cannot be null");
         }
     }
 

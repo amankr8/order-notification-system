@@ -38,10 +38,10 @@ public class NotifySubRepo implements Repository<Integer, NotifySub> {
         lock.writeLock().lock();
         try {
             NotifySub notifySub = clone(entity);
+            validateConstraints(notifySub);
             if (notifySub.getNotifySubId() == null) {
                 notifySub.setNotifySubId(nextId++);
             }
-            validateConstraint(notifySub);
             notifySubData.put(notifySub.getNotifySubId(), notifySub);
             constraintsMap.putIfAbsent(getConstraintId(notifySub), notifySub.getNotifySubId());
             return clone(notifySub);
@@ -50,9 +50,9 @@ public class NotifySubRepo implements Repository<Integer, NotifySub> {
         }
     }
 
-    private void validateConstraint(NotifySub entity) {
-        String constraintId = getConstraintId(entity);
-        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getNotifySubId())) {
+    private void validateConstraints(NotifySub notifySub) {
+        String constraintId = getConstraintId(notifySub);
+        if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(notifySub.getNotifySubId())) {
             throw new DataConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
         }
     }
