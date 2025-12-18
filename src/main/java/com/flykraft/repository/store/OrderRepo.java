@@ -1,6 +1,6 @@
-package com.flykraft.repository.order;
+package com.flykraft.repository.store;
 
-import com.flykraft.model.order.Order;
+import com.flykraft.model.store.Order;
 import com.flykraft.repository.Repository;
 
 import java.util.HashMap;

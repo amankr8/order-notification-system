@@ -1,7 +1,7 @@
 package com.flykraft.model.stakeholder;
 
 import com.flykraft.model.notification.Channel;
-import com.flykraft.model.order.OrderStatus;
+import com.flykraft.model.store.OrderStatus;
 
 import java.util.Map;
 import java.util.Set;

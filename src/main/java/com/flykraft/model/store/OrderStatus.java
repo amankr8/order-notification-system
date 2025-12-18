@@ -1,4 +1,4 @@
-package com.flykraft.model.order;
+package com.flykraft.model.store;
 
 public enum OrderStatus {
     PLACED(1, "Order Placed"),

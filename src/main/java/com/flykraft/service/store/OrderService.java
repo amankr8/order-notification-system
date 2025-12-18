@@ -1,11 +1,11 @@
-package com.flykraft.service.order;
+package com.flykraft.service.store;
 
-import com.flykraft.model.order.Order;
-import com.flykraft.model.order.OrderStatus;
+import com.flykraft.model.store.Order;
+import com.flykraft.model.store.OrderStatus;
 import com.flykraft.model.stakeholder.Customer;
 import com.flykraft.model.stakeholder.DeliveryPartner;
 import com.flykraft.model.stakeholder.Vendor;
-import com.flykraft.repository.order.OrderRepo;
+import com.flykraft.repository.store.OrderRepo;
 import com.flykraft.service.notification.NotificationService;
 import com.flykraft.service.stakeholder.CustomerService;
 import com.flykraft.service.stakeholder.DeliveryPartnerService;

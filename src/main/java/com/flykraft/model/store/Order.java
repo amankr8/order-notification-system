@@ -1,4 +1,4 @@
-package com.flykraft.model.order;
+package com.flykraft.model.store;
 
 public class Order {
     private Integer orderId;

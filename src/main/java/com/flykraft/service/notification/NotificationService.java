@@ -1,7 +1,7 @@
 package com.flykraft.service.notification;
 
 import com.flykraft.model.notification.*;
-import com.flykraft.model.order.Order;
+import com.flykraft.model.store.Order;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.model.stakeholder.StakeHolderCategory;
 import com.flykraft.repository.notification.ChannelSubRepo;
