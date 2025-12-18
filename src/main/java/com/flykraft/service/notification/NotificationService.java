@@ -33,7 +33,11 @@ public class NotificationService {
         this.channelSubRepo = channelSubRepo;
         this.statusSubRepo = statusSubRepo;
         this.stakeHolderService = stakeHolderService;
-        this.executorService = Executors.newFixedThreadPool(10);
+        this.executorService = Executors.newFixedThreadPool(10, task -> {
+            Thread t = new Thread(task);
+            t.setDaemon(true);
+            return t;
+        });
         addDefaultNotificationMessages();
     }
 
