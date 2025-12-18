@@ -4,7 +4,6 @@ import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.repository.Repository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -19,16 +18,6 @@ public class StakeHolderRepo implements Repository<Integer, StakeHolder> {
         this.nextId = 1;
         this.stakeHolderData = new HashMap<>();
         lock = new ReentrantReadWriteLock();
-    }
-
-    @Override
-    public List<StakeHolder> findAll() {
-        lock.readLock().lock();
-        try {
-            return stakeHolderData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
     }
 
     @Override

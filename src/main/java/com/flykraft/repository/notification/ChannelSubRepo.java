@@ -23,16 +23,6 @@ public class ChannelSubRepo implements Repository<Integer, ChannelSub> {
     }
 
     @Override
-    public List<ChannelSub> findAll() {
-        lock.readLock().lock();
-        try {
-            return channelSubData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    @Override
     public Optional<ChannelSub> findById(Integer id) {
         lock.readLock().lock();
         try {

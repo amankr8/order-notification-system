@@ -23,16 +23,6 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     }
 
     @Override
-    public List<StatusSub> findAll() {
-        lock.readLock().lock();
-        try {
-            return statusSubData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    @Override
     public Optional<StatusSub> findById(Integer id) {
         lock.readLock().lock();
         try {

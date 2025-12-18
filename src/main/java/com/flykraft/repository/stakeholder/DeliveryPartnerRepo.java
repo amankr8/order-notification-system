@@ -4,7 +4,6 @@ import com.flykraft.model.stakeholder.DeliveryPartner;
 import com.flykraft.repository.Repository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -19,16 +18,6 @@ public class DeliveryPartnerRepo implements Repository<Integer, DeliveryPartner>
         this.nextId = 1;
         partnerData = new HashMap<>();
         lock = new ReentrantReadWriteLock();
-    }
-
-    @Override
-    public List<DeliveryPartner> findAll() {
-        lock.readLock().lock();
-        try {
-            return partnerData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
     }
 
     @Override

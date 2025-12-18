@@ -4,7 +4,6 @@ import com.flykraft.model.stakeholder.Customer;
 import com.flykraft.repository.Repository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -19,16 +18,6 @@ public class CustomerRepo implements Repository<Integer, Customer> {
         this.nextId = 1;
         this.customerData = new HashMap<>();
         lock = new ReentrantReadWriteLock();
-    }
-
-    @Override
-    public List<Customer> findAll() {
-        lock.readLock().lock();
-        try {
-            return customerData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
     }
 
     @Override

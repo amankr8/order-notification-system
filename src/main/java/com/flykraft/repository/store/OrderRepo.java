@@ -4,7 +4,6 @@ import com.flykraft.model.store.Order;
 import com.flykraft.repository.Repository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -19,16 +18,6 @@ public class OrderRepo implements Repository<Integer, Order> {
         this.nextId = 1;
         this.orderData = new HashMap<>();
         lock = new ReentrantReadWriteLock();
-    }
-
-    @Override
-    public List<Order> findAll() {
-        lock.readLock().lock();
-        try {
-            return orderData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
     }
 
     @Override

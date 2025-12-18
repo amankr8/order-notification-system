@@ -23,16 +23,6 @@ public class NotifyMsgRepo implements Repository<Integer, NotifyMsg> {
     }
 
     @Override
-    public List<NotifyMsg> findAll() {
-        lock.readLock().lock();
-        try {
-            return notifyMsgData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    @Override
     public Optional<NotifyMsg> findById(Integer id) {
         lock.readLock().lock();
         try {

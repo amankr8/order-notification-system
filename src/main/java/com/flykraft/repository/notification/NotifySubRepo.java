@@ -23,16 +23,6 @@ public class NotifySubRepo implements Repository<Integer, NotifySub> {
     }
 
     @Override
-    public List<NotifySub> findAll() {
-        lock.readLock().lock();
-        try {
-            return notifySubData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    @Override
     public Optional<NotifySub> findById(Integer id) {
         lock.readLock().lock();
         try {

@@ -4,7 +4,6 @@ import com.flykraft.model.stakeholder.Vendor;
 import com.flykraft.repository.Repository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -19,16 +18,6 @@ public class VendorRepo implements Repository<Integer, Vendor> {
         this.nextId = 1;
         this.vendorData = new HashMap<>();
         lock = new ReentrantReadWriteLock();
-    }
-
-    @Override
-    public List<Vendor> findAll() {
-        lock.readLock().lock();
-        try {
-            return vendorData.values().stream().map(this::clone).toList();
-        } finally {
-            lock.readLock().unlock();
-        }
     }
 
     @Override
