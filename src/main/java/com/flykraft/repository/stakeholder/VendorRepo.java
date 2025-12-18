@@ -7,37 +7,73 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class VendorRepo implements Repository<Integer, Vendor> {
     private int nextId;
     private final Map<Integer, Vendor> vendorData;
+    private final ReadWriteLock lock;
 
     public VendorRepo() {
         this.nextId = 1;
         this.vendorData = new HashMap<>();
+        lock = new ReentrantReadWriteLock();
     }
 
     @Override
     public List<Vendor> findAll() {
-        return vendorData.values().parallelStream().toList();
+        lock.readLock().lock();
+        try {
+            return vendorData.values().stream().map(this::clone).toList();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public Optional<Vendor> findById(Integer id) {
-        return Optional.ofNullable(vendorData.get(id));
+        lock.readLock().lock();
+        try {
+            Vendor vendor = vendorData.get(id);
+            return vendor == null ? Optional.empty() : Optional.of(clone(vendor));
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public Vendor save(Vendor entity) {
-        if (entity.getVendorId() == null) {
-            entity.setVendorId(nextId++);
+        lock.writeLock().lock();
+        try {
+            Vendor vendor = clone(entity);
+            if (vendor.getVendorId() == null) {
+                vendor.setVendorId(nextId++);
+            }
+            vendorData.put(vendor.getVendorId(), vendor);
+            return clone(vendor);
+        } finally {
+            lock.writeLock().unlock();
         }
-        vendorData.put(entity.getVendorId(), entity);
-        return entity;
     }
 
     @Override
     public void deleteById(Integer id) {
-        vendorData.remove(id);
+        lock.writeLock().lock();
+        try {
+            vendorData.remove(id);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    private Vendor clone(Vendor entity) {
+        Vendor clone = new Vendor(entity.getVendorName());
+        clone.setVendorId(entity.getVendorId());
+        clone.setStakeHolderId(entity.getStakeHolderId());
+        clone.setStakeHolderName(entity.getStakeHolderName());
+        clone.setStakeHolderCategoryId(entity.getStakeHolderCategoryId());
+        clone.setOptedInForNotifications(entity.hasOptedInForNotifications());
+        return clone;
     }
 }
