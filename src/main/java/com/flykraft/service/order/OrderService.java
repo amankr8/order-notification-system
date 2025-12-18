@@ -34,8 +34,8 @@ public class OrderService {
 
     public Order createOrder(Order order) {
         Order newOrder = orderRepo.save(order);
-        subscribeToRelevantStakeHolders(order);
-        notificationService.notify(order);
+        subscribeToRelevantStakeHolders(newOrder);
+        notificationService.notify(newOrder);
         return newOrder;
     }
 
