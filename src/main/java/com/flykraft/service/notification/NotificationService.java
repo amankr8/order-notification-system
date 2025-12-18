@@ -123,17 +123,26 @@ public class NotificationService {
     public void notify(Order order) {
         List<NotifySub> subs = notifySubRepo.findByOrderId(order.getOrderId());
         for (NotifySub sub : subs) {
-            executorService.submit(() -> processNotificationForSubscriber(order, sub));
+            Integer stakeHolderId = sub.getStakeHolderId();
+            executorService.submit(() -> processNotificationForSubscriber(order, stakeHolderId));
         }
     }
 
-    private void processNotificationForSubscriber(Order order, NotifySub sub) {
-        StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
-        if (stakeHolder.hasOptedInForNotifications() && validateStatusSubscriptionByStakeHolder(stakeHolder, order.getStatusId())) {
-            String message = getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), order.getStatusId());
-            List<Channel> channels = getChannelSubscriptionsByStakeHolderId(sub.getStakeHolderId());
+    public void replayNotificationToStakeholder(Order order, Integer statusId, Integer stakeHolderId) {
+        processNotificationForSubscriber(order, statusId, stakeHolderId);
+    }
+
+    private void processNotificationForSubscriber(Order order, Integer stakeHolderId) {
+        processNotificationForSubscriber(order, order.getStatusId(), stakeHolderId);
+    }
+
+    private void processNotificationForSubscriber(Order order, Integer statusId, Integer stakeHolderId) {
+        StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(stakeHolderId);
+        if (stakeHolder.hasOptedInForNotifications() && validateStatusSubscriptionByStakeHolder(stakeHolder, statusId)) {
+            String message = getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), statusId);
+            String notification = "[ORDER ID:" + order.getOrderId() + "][CUSTOMER ID:" + order.getCustomerId() + "][VENDOR ID:" + order.getVendorId() + "] - " + message;
+            List<Channel> channels = getChannelSubscriptionsByStakeHolderId(stakeHolderId);
             for (Channel channel : channels) {
-                String notification = "Hi " + stakeHolder.getStakeHolderName() + "! " + message;
                 executorService.submit(() -> processNotificationForChannel(channel, notification));
             }
         }

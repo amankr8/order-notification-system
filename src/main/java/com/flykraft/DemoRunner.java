@@ -27,7 +27,7 @@ public class DemoRunner {
 
             System.out.println("\nCreating orders...");
             Order order1 = orderService.createOrder(new Order(customer1.getCustomerId(), vendor.getVendorId()));
-            Order order2 = orderService.createOrder(new Order(7, vendor.getVendorId()));
+            Order order2 = orderService.createOrder(new Order(customer1.getCustomerId(), vendor.getVendorId()));
 
             Thread.sleep(2000);
 

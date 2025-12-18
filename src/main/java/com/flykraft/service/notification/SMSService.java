@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class SMSService implements CommService {
 
     @Override
-    public void sendNotification(String message) {
-        System.out.println("[SMS]\t[" + LocalDateTime.now() + "]\t[NOTIFICATION] - " + message);
+    public void sendNotification(String notification) {
+        System.out.println("[SMS]\t[" + LocalDateTime.now() + "][NOTIFICATION]" + notification);
     }
 }

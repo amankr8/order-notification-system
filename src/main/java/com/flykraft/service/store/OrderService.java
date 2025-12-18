@@ -44,7 +44,7 @@ public class OrderService {
             notificationService.notify(newOrder);
             return newOrder;
         } catch (RuntimeException e) {
-            logger.warning("Could not place the order");
+            logger.warning("Could not place the order: " + e.getMessage());
             throw e;
         }
     }
