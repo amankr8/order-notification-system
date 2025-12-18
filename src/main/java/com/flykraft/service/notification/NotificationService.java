@@ -4,10 +4,10 @@ import com.flykraft.model.notification.*;
 import com.flykraft.model.order.Order;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.model.stakeholder.StakeHolderCategory;
-import com.flykraft.repository.notification.ChannelPrefRepo;
+import com.flykraft.repository.notification.ChannelSubRepo;
 import com.flykraft.repository.notification.NotifyMsgRepo;
 import com.flykraft.repository.notification.NotifySubRepo;
-import com.flykraft.repository.notification.StatusPrefRepo;
+import com.flykraft.repository.notification.StatusSubRepo;
 import com.flykraft.service.stakeholder.StakeHolderService;
 
 import java.util.ArrayList;
@@ -21,17 +21,17 @@ public class NotificationService {
 
     private final NotifySubRepo notifySubRepo;
     private final NotifyMsgRepo notifyMsgRepo;
-    private final ChannelPrefRepo channelPrefRepo;
-    private final StatusPrefRepo statusPrefRepo;
+    private final ChannelSubRepo channelSubRepo;
+    private final StatusSubRepo statusSubRepo;
     private final StakeHolderService stakeHolderService;
 
     private final ExecutorService executorService;
 
-    public NotificationService(NotifySubRepo notifySubRepo, NotifyMsgRepo notifyMsgRepo, ChannelPrefRepo channelPrefRepo, StatusPrefRepo statusPrefRepo, StakeHolderService stakeHolderService) {
+    public NotificationService(NotifySubRepo notifySubRepo, NotifyMsgRepo notifyMsgRepo, ChannelSubRepo channelSubRepo, StatusSubRepo statusSubRepo, StakeHolderService stakeHolderService) {
         this.notifySubRepo = notifySubRepo;
         this.notifyMsgRepo = notifyMsgRepo;
-        this.channelPrefRepo = channelPrefRepo;
-        this.statusPrefRepo = statusPrefRepo;
+        this.channelSubRepo = channelSubRepo;
+        this.statusSubRepo = statusSubRepo;
         this.stakeHolderService = stakeHolderService;
         this.executorService = Executors.newFixedThreadPool(10);
         addDefaultNotificationMessages();
@@ -63,15 +63,15 @@ public class NotificationService {
     public void subscribeToStatuses(Integer stakeHolderId, Set<Integer> orderStatusIds) {
         for (Integer orderStatusId : orderStatusIds) {
             StatusSub statusSub = new StatusSub(stakeHolderId, orderStatusId);
-            statusPrefRepo.save(statusSub);
+            statusSubRepo.save(statusSub);
         }
     }
 
     public void unsubscribeFromStatuses(Integer stakeHolderId, Set<Integer> orderStatusIds) {
-        List<StatusSub> statusSubs = statusPrefRepo.findByStakeHolderId(stakeHolderId);
+        List<StatusSub> statusSubs = statusSubRepo.findByStakeHolderId(stakeHolderId);
         for (StatusSub statusSub : statusSubs) {
             if (orderStatusIds.contains(statusSub.getOrderStatusId())) {
-                statusPrefRepo.deleteById(statusSub.getStatusSubId());
+                statusSubRepo.deleteById(statusSub.getStatusSubId());
             }
         }
     }
@@ -79,15 +79,15 @@ public class NotificationService {
     public void subscribeToChannels(Integer stakeHolderId, Set<Integer> channelIds) {
         for (Integer channelId : channelIds) {
             ChannelSub channelSub = new ChannelSub(stakeHolderId, channelId);
-            channelPrefRepo.save(channelSub);
+            channelSubRepo.save(channelSub);
         }
     }
 
     public void unsubscribeFromChannels(Integer stakeHolderId, Set<Integer> channelIds) {
-        List<ChannelSub> channelSubs = channelPrefRepo.findByStakeHolderId(stakeHolderId);
+        List<ChannelSub> channelSubs = channelSubRepo.findByStakeHolderId(stakeHolderId);
         for (ChannelSub channelSub : channelSubs) {
             if (channelIds.contains(channelSub.getChannelId())) {
-                channelPrefRepo.deleteById(channelSub.getChannelSubId());
+                channelSubRepo.deleteById(channelSub.getChannelSubId());
             }
         }
     }
@@ -140,7 +140,7 @@ public class NotificationService {
     }
 
     private boolean validateStatusSubscriptionByStakeHolder(StakeHolder stakeHolder, Integer orderStatusId) {
-        List<StatusSub> statusSubs = statusPrefRepo.findByStakeHolderId(stakeHolder.getStakeHolderId());
+        List<StatusSub> statusSubs = statusSubRepo.findByStakeHolderId(stakeHolder.getStakeHolderId());
         for (StatusSub statusSub : statusSubs) {
             if (statusSub.getOrderStatusId().equals(orderStatusId)) {
                 return true;
@@ -150,7 +150,7 @@ public class NotificationService {
     }
 
     private List<Channel> getChannelSubscriptionsByStakeHolderId(Integer stakeHolderId) {
-        List<ChannelSub> channelSubs = channelPrefRepo.findByStakeHolderId(stakeHolderId);
+        List<ChannelSub> channelSubs = channelSubRepo.findByStakeHolderId(stakeHolderId);
         List<Channel> channels = new ArrayList<>();
         for (ChannelSub channelSub : channelSubs) {
             channels.add(Channel.getChannelById(channelSub.getChannelId()));

@@ -1,9 +1,9 @@
 package com.flykraft;
 
-import com.flykraft.repository.notification.ChannelPrefRepo;
+import com.flykraft.repository.notification.ChannelSubRepo;
 import com.flykraft.repository.notification.NotifyMsgRepo;
 import com.flykraft.repository.notification.NotifySubRepo;
-import com.flykraft.repository.notification.StatusPrefRepo;
+import com.flykraft.repository.notification.StatusSubRepo;
 import com.flykraft.repository.order.OrderRepo;
 import com.flykraft.repository.stakeholder.CustomerRepo;
 import com.flykraft.repository.stakeholder.DeliveryPartnerRepo;
@@ -18,10 +18,10 @@ import com.flykraft.service.stakeholder.VendorService;
 
 public class Main {
     public static void main(String[] args) {
-        ChannelPrefRepo channelPrefRepo = new ChannelPrefRepo();
+        ChannelSubRepo channelSubRepo = new ChannelSubRepo();
         NotifyMsgRepo notifyMsgRepo = new NotifyMsgRepo();
         NotifySubRepo notifySubRepo = new NotifySubRepo();
-        StatusPrefRepo statusPrefRepo = new StatusPrefRepo();
+        StatusSubRepo statusSubRepo = new StatusSubRepo();
 
         OrderRepo orderRepo = new OrderRepo();
 
@@ -32,7 +32,7 @@ public class Main {
 
         StakeHolderService stakeHolderService = new StakeHolderService(stakeHolderRepo);
 
-        NotificationService notificationService = new NotificationService(notifySubRepo, notifyMsgRepo, channelPrefRepo, statusPrefRepo, stakeHolderService);
+        NotificationService notificationService = new NotificationService(notifySubRepo, notifyMsgRepo, channelSubRepo, statusSubRepo, stakeHolderService);
 
         CustomerService customerService = new CustomerService(customerRepo, stakeHolderService, notificationService);
         VendorService vendorService = new VendorService(vendorRepo, stakeHolderService, notificationService);

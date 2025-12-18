@@ -7,25 +7,25 @@ import com.flykraft.repository.Repository;
 
 import java.util.*;
 
-public class StatusPrefRepo implements Repository<Integer, StatusSub> {
+public class StatusSubRepo implements Repository<Integer, StatusSub> {
     private int nextId;
-    private final Map<Integer, StatusSub> statusPrefData;
+    private final Map<Integer, StatusSub> statusSubData;
     private final Map<String, Integer> constraintsMap;
 
-    public StatusPrefRepo() {
+    public StatusSubRepo() {
         this.nextId = 1;
-        this.statusPrefData = new HashMap<>();
+        this.statusSubData = new HashMap<>();
         this.constraintsMap = new HashMap<>();
     }
 
     @Override
     public List<StatusSub> findAll() {
-        return statusPrefData.values().parallelStream().toList();
+        return statusSubData.values().parallelStream().toList();
     }
 
     @Override
     public Optional<StatusSub> findById(Integer id) {
-        return Optional.ofNullable(statusPrefData.get(id));
+        return Optional.ofNullable(statusSubData.get(id));
     }
 
     @Override
@@ -34,7 +34,7 @@ public class StatusPrefRepo implements Repository<Integer, StatusSub> {
         if (entity.getStatusSubId() == null) {
             entity.setStatusSubId(nextId++);
         }
-        statusPrefData.put(entity.getStatusSubId(), entity);
+        statusSubData.put(entity.getStatusSubId(), entity);
         constraintsMap.putIfAbsent(getConstraintId(entity), entity.getStatusSubId());
         return entity;
     }
@@ -48,14 +48,14 @@ public class StatusPrefRepo implements Repository<Integer, StatusSub> {
 
     @Override
     public void deleteById(Integer id) {
-        StatusSub entity = statusPrefData.get(id);
+        StatusSub entity = statusSubData.get(id);
         constraintsMap.remove(getConstraintId(entity));
-        statusPrefData.remove(id);
+        statusSubData.remove(id);
     }
 
     public List<StatusSub> findByStakeHolderId(Integer stakeHolderId) {
         List<StatusSub> statusSubs = new ArrayList<>();
-        for (StatusSub statusSub : statusPrefData.values()) {
+        for (StatusSub statusSub : statusSubData.values()) {
             if (statusSub.getStakeHolderId().equals(stakeHolderId)) {
                 statusSubs.add(statusSub);
             }

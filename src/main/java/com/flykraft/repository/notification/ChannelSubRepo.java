@@ -7,25 +7,25 @@ import com.flykraft.repository.Repository;
 
 import java.util.*;
 
-public class ChannelPrefRepo implements Repository<Integer, ChannelSub> {
+public class ChannelSubRepo implements Repository<Integer, ChannelSub> {
     private int nextId;
-    private final Map<Integer, ChannelSub> channelPrefData;
+    private final Map<Integer, ChannelSub> channelSubData;
     private final Map<String, Integer> constraintsMap;
 
-    public ChannelPrefRepo() {
+    public ChannelSubRepo() {
         this.nextId = 1;
-        this.channelPrefData = new HashMap<>();
+        this.channelSubData = new HashMap<>();
         this.constraintsMap = new HashMap<>();
     }
 
     @Override
     public List<ChannelSub> findAll() {
-        return channelPrefData.values().parallelStream().toList();
+        return channelSubData.values().parallelStream().toList();
     }
 
     @Override
     public Optional<ChannelSub> findById(Integer id) {
-        return Optional.ofNullable(channelPrefData.get(id));
+        return Optional.ofNullable(channelSubData.get(id));
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ChannelPrefRepo implements Repository<Integer, ChannelSub> {
         if (entity.getChannelSubId() == null) {
             entity.setChannelSubId(nextId++);
         }
-        channelPrefData.put(entity.getChannelSubId(), entity);
+        channelSubData.put(entity.getChannelSubId(), entity);
         constraintsMap.putIfAbsent(getConstraintId(entity), entity.getChannelSubId());
         return entity;
     }
@@ -48,14 +48,14 @@ public class ChannelPrefRepo implements Repository<Integer, ChannelSub> {
 
     @Override
     public void deleteById(Integer id) {
-        ChannelSub entity = channelPrefData.get(id);
+        ChannelSub entity = channelSubData.get(id);
         constraintsMap.remove(getConstraintId(entity));
-        channelPrefData.remove(id);
+        channelSubData.remove(id);
     }
 
     public List<ChannelSub> findByStakeHolderId(Integer stakeHolderId) {
         List<ChannelSub> channelSubs = new ArrayList<>();
-        for (ChannelSub channelSub : channelPrefData.values()) {
+        for (ChannelSub channelSub : channelSubData.values()) {
             if (channelSub.getStakeHolderId().equals(stakeHolderId)) {
                 channelSubs.add(channelSub);
             }
