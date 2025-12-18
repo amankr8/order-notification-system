@@ -143,7 +143,7 @@ public class NotificationService {
         channel.getService().sendNotification(notification);
     }
 
-    private boolean validateStatusSubscriptionByStakeHolder(StakeHolder stakeHolder, Integer orderStatusId) {
+    public boolean validateStatusSubscriptionByStakeHolder(StakeHolder stakeHolder, Integer orderStatusId) {
         List<StatusSub> statusSubs = statusSubRepo.findByStakeHolderId(stakeHolder.getStakeHolderId());
         for (StatusSub statusSub : statusSubs) {
             if (statusSub.getOrderStatusId().equals(orderStatusId)) {
@@ -153,7 +153,7 @@ public class NotificationService {
         return false;
     }
 
-    private List<Channel> getChannelSubscriptionsByStakeHolderId(Integer stakeHolderId) {
+    public List<Channel> getChannelSubscriptionsByStakeHolderId(Integer stakeHolderId) {
         List<ChannelSub> channelSubs = channelSubRepo.findByStakeHolderId(stakeHolderId);
         List<Channel> channels = new ArrayList<>();
         for (ChannelSub channelSub : channelSubs) {
@@ -162,7 +162,7 @@ public class NotificationService {
         return channels;
     }
 
-    private String getMessageByCategoryAndStatusId(Integer categoryId, Integer statusId) {
+    public String getMessageByCategoryAndStatusId(Integer categoryId, Integer statusId) {
         List<NotifyMsg> notifyMsgs = notifyMsgRepo.findByCategoryId(categoryId);
         for (NotifyMsg notifyMsg : notifyMsgs) {
             if (notifyMsg.getOrderStatusId().equals(statusId)) {
