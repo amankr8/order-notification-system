@@ -129,6 +129,9 @@ public class NotificationService {
     }
 
     public void replayNotificationToStakeholder(Order order, Integer statusId, Integer stakeHolderId) {
+        if (order.getStatusId() < statusId) {
+            throw new IllegalArgumentException("Invalid replay of order status!");
+        }
         processNotificationForSubscriber(order, statusId, stakeHolderId);
     }
 
