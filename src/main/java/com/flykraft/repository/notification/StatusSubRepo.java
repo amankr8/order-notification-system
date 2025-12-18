@@ -5,25 +5,20 @@ import com.flykraft.exception.DataConstraintViolationException;
 import com.flykraft.model.notification.StatusSub;
 import com.flykraft.repository.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class StatusSubRepo implements Repository<Integer, StatusSub> {
-    private final AtomicInteger nextId;
+    private int nextId;
     private final Map<Integer, StatusSub> statusSubData;
     private final Map<String, Integer> constraintsMap;
     private final ReadWriteLock lock;
 
     public StatusSubRepo() {
-        this.nextId = new AtomicInteger(1);
-        this.statusSubData = new ConcurrentHashMap<>();
-        this.constraintsMap = new ConcurrentHashMap<>();
+        this.nextId = 1;
+        this.statusSubData = new HashMap<>();
+        this.constraintsMap = new HashMap<>();
         lock = new ReentrantReadWriteLock();
     }
 
@@ -31,7 +26,7 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     public List<StatusSub> findAll() {
         lock.readLock().lock();
         try {
-            return statusSubData.values().parallelStream().toList();
+            return statusSubData.values().stream().toList();
         } finally {
             lock.readLock().unlock();
         }
@@ -51,11 +46,10 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     public StatusSub save(StatusSub entity) {
         lock.writeLock().lock();
         try {
-            validateConstraint(entity);
             if (entity.getStatusSubId() == null) {
-                int id = nextId.getAndIncrement();
-                entity.setStatusSubId(id);
+                entity.setStatusSubId(nextId++);
             }
+            validateConstraint(entity);
             statusSubData.put(entity.getStatusSubId(), entity);
             constraintsMap.put(getConstraintId(entity), entity.getStatusSubId());
             return entity;
@@ -75,9 +69,10 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     public void deleteById(Integer id) {
         lock.writeLock().lock();
         try {
-            StatusSub entity = statusSubData.get(id);
-            constraintsMap.remove(getConstraintId(entity));
-            statusSubData.remove(id);
+            StatusSub removedEntity = statusSubData.remove(id);
+            if (removedEntity != null) {
+                constraintsMap.remove(getConstraintId(removedEntity));
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -99,6 +94,9 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     }
 
     private String getConstraintId(StatusSub entity) {
-        return entity.getStakeHolderId() + String.valueOf(entity.getOrderStatusId());
+        if (entity.getStakeHolderId() == null || entity.getOrderStatusId() == null) {
+            throw new DataConstraintViolationException("StakeHolder Id and OrderStatus Id must not be null");
+        }
+        return entity.getStakeHolderId() + "&" + entity.getOrderStatusId();
     }
 }
