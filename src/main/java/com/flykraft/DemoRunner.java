@@ -16,31 +16,39 @@ import java.util.Set;
 
 public class DemoRunner {
     public static void runDemo(StakeHolderService stakeHolderService, CustomerService customerService, VendorService vendorService, DeliveryPartnerService deliveryPartnerService, OrderService orderService, NotificationService notificationService) {
-        Customer customer1 = customerService.createCustomer(new Customer("John Doe"));
-        Customer customer2 = customerService.createCustomer(new Customer("Michael Horn"));
-        Vendor vendor = vendorService.createVendor(new Vendor("Best Vendor"));
-        DeliveryPartner deliveryPartner = deliveryPartnerService.createPartner(new DeliveryPartner("Ekart Logistics"));
+        try {
+            Customer customer1 = customerService.createCustomer(new Customer("John Doe"));
+            Customer customer2 = customerService.createCustomer(new Customer("Michael Horn"));
+            Vendor vendor = vendorService.createVendor(new Vendor("Best Vendor"));
+            DeliveryPartner deliveryPartner = deliveryPartnerService.createPartner(new DeliveryPartner("Ekart Logistics"));
 
-        notificationService.unsubscribeFromStatuses(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
-        System.out.println("\n" + customer1.getCustomerName() + " has removed " + OrderStatus.DELIVERED.getName() + " status from his update preferences");
+            notificationService.unsubscribeFromStatuses(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
+            System.out.println("\n" + customer1.getCustomerName() + " has removed " + OrderStatus.DELIVERED.getName() + " status from his update preferences");
 
-        System.out.println("\nCreating an order...");
-        Order order1 = orderService.createOrder(new Order(customer1.getCustomerId(), vendor.getVendorId()));
-        Order order2 = orderService.createOrder(new Order(customer2.getCustomerId(), vendor.getVendorId()));
+            System.out.println("\nCreating orders...");
+            Order order1 = orderService.createOrder(new Order(customer1.getCustomerId(), vendor.getVendorId()));
+            Order order2 = orderService.createOrder(new Order(customer2.getCustomerId(), vendor.getVendorId()));
 
-        notificationService.subscribeToStatuses(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
-        System.out.println("\n" + customer1.getCustomerName() + " has added " + OrderStatus.DELIVERED.getName() + " status to his update preferences");
+            Thread.sleep(2000);
 
-        orderService.assignDeliveryPartner(order1.getOrderId(), deliveryPartner.getPartnerId());
-        System.out.println("\nDelivery Partner assigned -> " + deliveryPartner.getPartnerName());
+            notificationService.subscribeToStatuses(customer1.getStakeHolderId(), Set.of(OrderStatus.DELIVERED.getId()));
+            System.out.println("\n" + customer1.getCustomerName() + " has added " + OrderStatus.DELIVERED.getName() + " status to his update preferences");
 
-        System.out.println("\nShipping the order...");
-        orderService.changeStatus(order1, OrderStatus.SHIPPED);
+            orderService.assignDeliveryPartner(order1.getOrderId(), deliveryPartner.getPartnerId());
+            System.out.println("\nDelivery Partner assigned -> " + deliveryPartner.getPartnerName());
 
-        notificationService.unsubscribeFromOrder(customer1.getStakeHolderId(), order1.getOrderId());
-        System.out.println("\n" + customer1.getCustomerName() + " has unsubscribed from order ID: " + order1.getOrderId());
+            System.out.println("\nShipping orders...");
+            orderService.changeStatus(order1, OrderStatus.SHIPPED);
 
-        System.out.println("\nDelivering the order...");
-        orderService.changeStatus(order1, OrderStatus.DELIVERED);
+            Thread.sleep(2000);
+
+            notificationService.unsubscribeFromOrder(customer1.getStakeHolderId(), order1.getOrderId());
+            System.out.println("\n" + customer1.getCustomerName() + " has unsubscribed from order ID: " + order1.getOrderId());
+
+            System.out.println("\nDelivering orders...");
+            orderService.changeStatus(order1, OrderStatus.DELIVERED);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

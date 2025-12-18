@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NotificationService {
 
@@ -23,12 +25,15 @@ public class NotificationService {
     private final StatusPrefRepo statusPrefRepo;
     private final StakeHolderService stakeHolderService;
 
+    private final ExecutorService executorService;
+
     public NotificationService(NotifySubRepo notifySubRepo, NotifyMsgRepo notifyMsgRepo, ChannelPrefRepo channelPrefRepo, StatusPrefRepo statusPrefRepo, StakeHolderService stakeHolderService) {
         this.notifySubRepo = notifySubRepo;
         this.notifyMsgRepo = notifyMsgRepo;
         this.channelPrefRepo = channelPrefRepo;
         this.statusPrefRepo = statusPrefRepo;
         this.stakeHolderService = stakeHolderService;
+        this.executorService = Executors.newFixedThreadPool(10);
         addDefaultNotificationMessages();
     }
 
@@ -114,15 +119,24 @@ public class NotificationService {
     public void notify(Order order) {
         List<NotifySub> subs = notifySubRepo.findByOrderId(order.getOrderId());
         for (NotifySub sub : subs) {
-            StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
-            if (stakeHolder.hasOptedInForNotifications() && validateStatusSubscriptionByStakeHolder(stakeHolder, order.getStatusId())) {
-                String message = getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), order.getStatusId());
-                List<Channel> channels = getChannelSubscriptionsByStakeHolderId(sub.getStakeHolderId());
-                for (Channel channel : channels) {
-                    channel.getService().sendNotification("Hi " + stakeHolder.getStakeHolderName() + "! " + message);
-                }
+            executorService.submit(() -> processNotificationForSubscriber(order, sub));
+        }
+    }
+
+    private void processNotificationForSubscriber(Order order, NotifySub sub) {
+        StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
+        if (stakeHolder.hasOptedInForNotifications() && validateStatusSubscriptionByStakeHolder(stakeHolder, order.getStatusId())) {
+            String message = getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), order.getStatusId());
+            List<Channel> channels = getChannelSubscriptionsByStakeHolderId(sub.getStakeHolderId());
+            for (Channel channel : channels) {
+                String notification = "Hi " + stakeHolder.getStakeHolderName() + "! " + message;
+                executorService.submit(() -> processNotificationForChannel(channel, notification));
             }
         }
+    }
+
+    private void processNotificationForChannel(Channel channel, String notification) {
+        channel.getService().sendNotification(notification);
     }
 
     private boolean validateStatusSubscriptionByStakeHolder(StakeHolder stakeHolder, Integer orderStatusId) {
