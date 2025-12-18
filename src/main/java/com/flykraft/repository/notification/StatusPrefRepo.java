@@ -1,7 +1,7 @@
 package com.flykraft.repository.notification;
 
 import com.flykraft.config.GlobalConfig;
-import com.flykraft.exception.ConstraintViolationException;
+import com.flykraft.exception.DataConstraintViolationException;
 import com.flykraft.model.notification.StatusSub;
 import com.flykraft.repository.Repository;
 
@@ -42,7 +42,7 @@ public class StatusPrefRepo implements Repository<Integer, StatusSub> {
     private void validateConstraint(StatusSub entity) {
         String constraintId = getConstraintId(entity);
         if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getStatusSubId())) {
-            throw new ConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
+            throw new DataConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
         }
     }
 

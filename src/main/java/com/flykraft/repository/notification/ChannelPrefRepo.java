@@ -1,7 +1,7 @@
 package com.flykraft.repository.notification;
 
 import com.flykraft.config.GlobalConfig;
-import com.flykraft.exception.ConstraintViolationException;
+import com.flykraft.exception.DataConstraintViolationException;
 import com.flykraft.model.notification.ChannelSub;
 import com.flykraft.repository.Repository;
 
@@ -42,7 +42,7 @@ public class ChannelPrefRepo implements Repository<Integer, ChannelSub> {
     private void validateConstraint(ChannelSub entity) {
         String constraintId = getConstraintId(entity);
         if (constraintsMap.containsKey(constraintId) && !constraintsMap.get(constraintId).equals(entity.getChannelSubId())) {
-            throw new ConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
+            throw new DataConstraintViolationException(GlobalConfig.DATA_CONSTRAINT_VIOLATION_MSG);
         }
     }
 
