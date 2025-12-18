@@ -6,37 +6,58 @@ import com.flykraft.model.notification.ChannelSub;
 import com.flykraft.repository.Repository;
 
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChannelSubRepo implements Repository<Integer, ChannelSub> {
     private int nextId;
     private final Map<Integer, ChannelSub> channelSubData;
     private final Map<String, Integer> constraintsMap;
+    private final ReadWriteLock lock;
 
     public ChannelSubRepo() {
         this.nextId = 1;
         this.channelSubData = new HashMap<>();
         this.constraintsMap = new HashMap<>();
+        lock = new ReentrantReadWriteLock();
     }
 
     @Override
     public List<ChannelSub> findAll() {
-        return channelSubData.values().parallelStream().toList();
+        lock.readLock().lock();
+        try {
+            return channelSubData.values().stream().map(this::clone).toList();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public Optional<ChannelSub> findById(Integer id) {
-        return Optional.ofNullable(channelSubData.get(id));
+        lock.readLock().lock();
+        try {
+            ChannelSub channelSub = channelSubData.get(id);
+            return channelSub == null ? Optional.empty() : Optional.of(clone(channelSub));
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public ChannelSub save(ChannelSub entity) {
-        validateConstraint(entity);
-        if (entity.getChannelSubId() == null) {
-            entity.setChannelSubId(nextId++);
+        lock.writeLock().lock();
+        try {
+            ChannelSub channelSub = clone(entity);
+            if (channelSub.getChannelSubId() == null) {
+                channelSub.setChannelSubId(nextId++);
+            }
+            validateConstraint(channelSub);
+            channelSubData.put(channelSub.getChannelSubId(), channelSub);
+            constraintsMap.putIfAbsent(getConstraintId(channelSub), channelSub.getChannelSubId());
+            return clone(channelSub);
+        } finally {
+            lock.writeLock().unlock();
         }
-        channelSubData.put(entity.getChannelSubId(), entity);
-        constraintsMap.putIfAbsent(getConstraintId(entity), entity.getChannelSubId());
-        return entity;
     }
 
     private void validateConstraint(ChannelSub entity) {
@@ -48,22 +69,40 @@ public class ChannelSubRepo implements Repository<Integer, ChannelSub> {
 
     @Override
     public void deleteById(Integer id) {
-        ChannelSub entity = channelSubData.get(id);
-        constraintsMap.remove(getConstraintId(entity));
-        channelSubData.remove(id);
+        lock.writeLock().lock();
+        try {
+            ChannelSub removedEntity = channelSubData.remove(id);
+            if (removedEntity != null) {
+                constraintsMap.remove(getConstraintId(removedEntity));
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public List<ChannelSub> findByStakeHolderId(Integer stakeHolderId) {
-        List<ChannelSub> channelSubs = new ArrayList<>();
-        for (ChannelSub channelSub : channelSubData.values()) {
-            if (channelSub.getStakeHolderId().equals(stakeHolderId)) {
-                channelSubs.add(channelSub);
-            }
+        lock.readLock().lock();
+        try {
+            return channelSubData.values()
+                    .stream()
+                    .filter(c -> c.getStakeHolderId().equals(stakeHolderId))
+                    .map(this::clone)
+                    .toList();
+        } finally {
+            lock.readLock().unlock();
         }
-        return channelSubs;
     }
 
     private String getConstraintId(ChannelSub entity) {
-        return entity.getStakeHolderId() + String.valueOf(entity.getChannelId());
+        if (entity.getStakeHolderId() == null || entity.getChannelId() == null) {
+            throw new DataConstraintViolationException("StakeHolder Id and Channel Id must not be null");
+        }
+        return entity.getStakeHolderId() + "&" + entity.getChannelId();
+    }
+
+    private ChannelSub clone(ChannelSub entity) {
+        ChannelSub clone = new ChannelSub(entity.getStakeHolderId(), entity.getChannelId());
+        clone.setChannelSubId(entity.getChannelSubId());
+        return clone;
     }
 }

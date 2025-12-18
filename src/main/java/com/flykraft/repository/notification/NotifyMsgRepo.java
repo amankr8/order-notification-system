@@ -6,37 +6,58 @@ import com.flykraft.model.notification.NotifyMsg;
 import com.flykraft.repository.Repository;
 
 import java.util.*;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class NotifyMsgRepo implements Repository<Integer, NotifyMsg> {
     private int nextId;
     private final Map<Integer, NotifyMsg> notifyMsgData;
     private final Map<String, Integer> constraintsMap;
+    private final ReadWriteLock lock;
 
     public NotifyMsgRepo() {
         this.nextId = 1;
         this.notifyMsgData = new HashMap<>();
         this.constraintsMap = new HashMap<>();
+        lock = new ReentrantReadWriteLock();
     }
 
     @Override
     public List<NotifyMsg> findAll() {
-        return notifyMsgData.values().parallelStream().toList();
+        lock.readLock().lock();
+        try {
+            return notifyMsgData.values().stream().map(this::clone).toList();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public Optional<NotifyMsg> findById(Integer id) {
-        return Optional.ofNullable(notifyMsgData.get(id));
+        lock.readLock().lock();
+        try {
+            NotifyMsg notifyMsg = notifyMsgData.get(id);
+            return notifyMsg == null ? Optional.empty() : Optional.of(clone(notifyMsg));
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public NotifyMsg save(NotifyMsg entity) {
-        validateConstraint(entity);
-        if (entity.getNotifyMsgId() == null) {
-            entity.setNotifyMsgId(nextId++);
+        lock.writeLock().lock();
+        try {
+            NotifyMsg notifyMsg = clone(entity);
+            if (notifyMsg.getNotifyMsgId() == null) {
+                notifyMsg.setNotifyMsgId(nextId++);
+            }
+            validateConstraint(notifyMsg);
+            notifyMsgData.put(notifyMsg.getNotifyMsgId(), notifyMsg);
+            constraintsMap.putIfAbsent(getConstraintId(notifyMsg), notifyMsg.getNotifyMsgId());
+            return clone(notifyMsg);
+        } finally {
+            lock.writeLock().unlock();
         }
-        notifyMsgData.put(entity.getNotifyMsgId(), entity);
-        constraintsMap.putIfAbsent(getConstraintId(entity), entity.getNotifyMsgId());
-        return entity;
     }
 
     private void validateConstraint(NotifyMsg entity) {
@@ -48,22 +69,40 @@ public class NotifyMsgRepo implements Repository<Integer, NotifyMsg> {
 
     @Override
     public void deleteById(Integer id) {
-        NotifyMsg entity = notifyMsgData.get(id);
-        constraintsMap.remove(getConstraintId(entity));
-        notifyMsgData.remove(id);
+        lock.writeLock().lock();
+        try {
+            NotifyMsg removedEntity = notifyMsgData.remove(id);
+            if (removedEntity != null) {
+                constraintsMap.remove(getConstraintId(removedEntity));
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public List<NotifyMsg> findByCategoryId(Integer stakeHolderCategoryId) {
-        List<NotifyMsg> notifyMsgs = new ArrayList<>();
-        for (NotifyMsg notifyMsg : notifyMsgData.values()) {
-            if (notifyMsg.getStakeHolderCategoryId().equals(stakeHolderCategoryId)) {
-                notifyMsgs.add(notifyMsg);
-            }
+        lock.readLock().lock();
+        try {
+            return notifyMsgData.values()
+                    .stream()
+                    .filter(m -> m.getStakeHolderCategoryId().equals(stakeHolderCategoryId))
+                    .map(this::clone)
+                    .toList();
+        } finally {
+            lock.readLock().unlock();
         }
-        return notifyMsgs;
     }
 
     private String getConstraintId(NotifyMsg entity) {
-        return entity.getStakeHolderCategoryId() + String.valueOf(entity.getOrderStatusId());
+        if (entity.getStakeHolderCategoryId() == null || entity.getOrderStatusId() == null) {
+            throw new DataConstraintViolationException("StakeHolder Category Id and Order Status Id must not be null");
+        }
+        return entity.getStakeHolderCategoryId() + "&" + entity.getOrderStatusId();
+    }
+
+    private NotifyMsg clone(NotifyMsg entity) {
+        NotifyMsg clone = new NotifyMsg(entity.getStakeHolderCategoryId(), entity.getOrderStatusId(), entity.getMessage());
+        clone.setNotifyMsgId(entity.getNotifyMsgId());
+        return clone;
     }
 }
