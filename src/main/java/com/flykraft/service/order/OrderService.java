@@ -40,9 +40,9 @@ public class OrderService {
     }
 
     public void assignDeliveryPartner(Integer orderId, Integer partnerId) {
-        Order order = getOrderById(orderId);
-        order.setPartnerId(partnerId);
         DeliveryPartner deliveryPartner = deliveryPartnerService.getPartnerById(partnerId);
+        Order order = getOrderById(orderId);
+        order.setPartnerId(deliveryPartner.getPartnerId());
         notificationService.subscribeToOrder(deliveryPartner.getStakeHolderId(), order.getOrderId());
         orderRepo.save(order);
     }
