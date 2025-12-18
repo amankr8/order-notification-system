@@ -5,38 +5,63 @@ import com.flykraft.exception.DataConstraintViolationException;
 import com.flykraft.model.notification.StatusSub;
 import com.flykraft.repository.Repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class StatusSubRepo implements Repository<Integer, StatusSub> {
-    private int nextId;
+    private final AtomicInteger nextId;
     private final Map<Integer, StatusSub> statusSubData;
     private final Map<String, Integer> constraintsMap;
+    private final ReadWriteLock lock;
 
     public StatusSubRepo() {
-        this.nextId = 1;
-        this.statusSubData = new HashMap<>();
-        this.constraintsMap = new HashMap<>();
+        this.nextId = new AtomicInteger(1);
+        this.statusSubData = new ConcurrentHashMap<>();
+        this.constraintsMap = new ConcurrentHashMap<>();
+        lock = new ReentrantReadWriteLock();
     }
 
     @Override
     public List<StatusSub> findAll() {
-        return statusSubData.values().parallelStream().toList();
+        lock.readLock().lock();
+        try {
+            return statusSubData.values().parallelStream().toList();
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public Optional<StatusSub> findById(Integer id) {
-        return Optional.ofNullable(statusSubData.get(id));
+        lock.readLock().lock();
+        try {
+            return Optional.ofNullable(statusSubData.get(id));
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
     @Override
     public StatusSub save(StatusSub entity) {
-        validateConstraint(entity);
-        if (entity.getStatusSubId() == null) {
-            entity.setStatusSubId(nextId++);
+        lock.writeLock().lock();
+        try {
+            validateConstraint(entity);
+            if (entity.getStatusSubId() == null) {
+                int id = nextId.getAndIncrement();
+                entity.setStatusSubId(id);
+            }
+            statusSubData.put(entity.getStatusSubId(), entity);
+            constraintsMap.put(getConstraintId(entity), entity.getStatusSubId());
+            return entity;
+        } finally {
+            lock.writeLock().unlock();
         }
-        statusSubData.put(entity.getStatusSubId(), entity);
-        constraintsMap.putIfAbsent(getConstraintId(entity), entity.getStatusSubId());
-        return entity;
     }
 
     private void validateConstraint(StatusSub entity) {
@@ -48,19 +73,29 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
 
     @Override
     public void deleteById(Integer id) {
-        StatusSub entity = statusSubData.get(id);
-        constraintsMap.remove(getConstraintId(entity));
-        statusSubData.remove(id);
+        lock.writeLock().lock();
+        try {
+            StatusSub entity = statusSubData.get(id);
+            constraintsMap.remove(getConstraintId(entity));
+            statusSubData.remove(id);
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     public List<StatusSub> findByStakeHolderId(Integer stakeHolderId) {
-        List<StatusSub> statusSubs = new ArrayList<>();
-        for (StatusSub statusSub : statusSubData.values()) {
-            if (statusSub.getStakeHolderId().equals(stakeHolderId)) {
-                statusSubs.add(statusSub);
+        lock.readLock().lock();
+        try {
+            List<StatusSub> statusSubs = new ArrayList<>();
+            for (StatusSub statusSub : statusSubData.values()) {
+                if (statusSub.getStakeHolderId().equals(stakeHolderId)) {
+                    statusSubs.add(statusSub);
+                }
             }
+            return statusSubs;
+        } finally {
+            lock.readLock().unlock();
         }
-        return statusSubs;
     }
 
     private String getConstraintId(StatusSub entity) {
