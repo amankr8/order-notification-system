@@ -26,7 +26,7 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     public List<StatusSub> findAll() {
         lock.readLock().lock();
         try {
-            return statusSubData.values().stream().toList();
+            return statusSubData.values().stream().map(this::clone).toList();
         } finally {
             lock.readLock().unlock();
         }
@@ -36,7 +36,8 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     public Optional<StatusSub> findById(Integer id) {
         lock.readLock().lock();
         try {
-            return Optional.ofNullable(statusSubData.get(id));
+            StatusSub statusSub = statusSubData.get(id);
+            return statusSub == null ? Optional.empty() : Optional.of(clone(statusSub));
         } finally {
             lock.readLock().unlock();
         }
@@ -46,13 +47,14 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     public StatusSub save(StatusSub entity) {
         lock.writeLock().lock();
         try {
-            if (entity.getStatusSubId() == null) {
-                entity.setStatusSubId(nextId++);
+            StatusSub statusSub = clone(entity);
+            if (statusSub.getStatusSubId() == null) {
+                statusSub.setStatusSubId(nextId++);
             }
-            validateConstraint(entity);
-            statusSubData.put(entity.getStatusSubId(), entity);
-            constraintsMap.put(getConstraintId(entity), entity.getStatusSubId());
-            return entity;
+            validateConstraint(statusSub);
+            statusSubData.put(statusSub.getStatusSubId(), statusSub);
+            constraintsMap.put(getConstraintId(statusSub), statusSub.getStatusSubId());
+            return clone(statusSub);
         } finally {
             lock.writeLock().unlock();
         }
@@ -81,13 +83,11 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
     public List<StatusSub> findByStakeHolderId(Integer stakeHolderId) {
         lock.readLock().lock();
         try {
-            List<StatusSub> statusSubs = new ArrayList<>();
-            for (StatusSub statusSub : statusSubData.values()) {
-                if (statusSub.getStakeHolderId().equals(stakeHolderId)) {
-                    statusSubs.add(statusSub);
-                }
-            }
-            return statusSubs;
+            return statusSubData.values()
+                    .stream()
+                    .filter(s -> s.getStakeHolderId().equals(stakeHolderId))
+                    .map(this::clone)
+                    .toList();
         } finally {
             lock.readLock().unlock();
         }
@@ -98,5 +98,11 @@ public class StatusSubRepo implements Repository<Integer, StatusSub> {
             throw new DataConstraintViolationException("StakeHolder Id and OrderStatus Id must not be null");
         }
         return entity.getStakeHolderId() + "&" + entity.getOrderStatusId();
+    }
+
+    private StatusSub clone(StatusSub entity) {
+        StatusSub clone = new StatusSub(entity.getStakeHolderId(), entity.getOrderStatusId());
+        clone.setStatusSubId(entity.getStatusSubId());
+        return clone;
     }
 }
