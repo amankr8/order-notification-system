@@ -1,5 +1,6 @@
 package com.flykraft.service.stakeholder;
 
+import com.flykraft.exception.ResourceNotFoundException;
 import com.flykraft.model.stakeholder.Customer;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.repository.stakeholder.CustomerRepo;
@@ -18,7 +19,7 @@ public class CustomerService {
 
     public Customer getCustomerById(Integer id) {
         return customerRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Stakeholder does not exist."));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer does not exist for the ID: " + id));
     }
 
     public Customer createCustomer(Customer customer) {

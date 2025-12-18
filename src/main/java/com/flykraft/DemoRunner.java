@@ -27,7 +27,7 @@ public class DemoRunner {
 
             System.out.println("\nCreating orders...");
             Order order1 = orderService.createOrder(new Order(customer1.getCustomerId(), vendor.getVendorId()));
-            Order order2 = orderService.createOrder(new Order(customer2.getCustomerId(), vendor.getVendorId()));
+            Order order2 = orderService.createOrder(new Order(7, vendor.getVendorId()));
 
             Thread.sleep(2000);
 
@@ -47,8 +47,8 @@ public class DemoRunner {
 
             System.out.println("\nDelivering orders...");
             orderService.changeStatus(order1, OrderStatus.DELIVERED);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

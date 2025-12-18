@@ -1,5 +1,7 @@
 package com.flykraft.service.store;
 
+import com.flykraft.exception.DataConstraintViolationException;
+import com.flykraft.exception.ResourceNotFoundException;
 import com.flykraft.model.store.Order;
 import com.flykraft.model.store.OrderStatus;
 import com.flykraft.model.stakeholder.Customer;
@@ -11,7 +13,10 @@ import com.flykraft.service.stakeholder.CustomerService;
 import com.flykraft.service.stakeholder.DeliveryPartnerService;
 import com.flykraft.service.stakeholder.VendorService;
 
+import java.util.logging.Logger;
+
 public class OrderService {
+    private final Logger logger = Logger.getLogger(OrderService.class.getName());
 
     private final OrderRepo orderRepo;
     private final CustomerService customerService;
@@ -33,10 +38,15 @@ public class OrderService {
     }
 
     public Order createOrder(Order order) {
-        Order newOrder = orderRepo.save(order);
-        subscribeToRelevantStakeHolders(newOrder);
-        notificationService.notify(newOrder);
-        return newOrder;
+        try {
+            Order newOrder = orderRepo.save(order);
+            subscribeToRelevantStakeHolders(newOrder);
+            notificationService.notify(newOrder);
+            return newOrder;
+        } catch (RuntimeException e) {
+            logger.warning("Could not place the order");
+            throw e;
+        }
     }
 
     public void assignDeliveryPartner(Integer orderId, Integer partnerId) {
