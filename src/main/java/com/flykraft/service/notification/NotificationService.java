@@ -4,6 +4,7 @@ import com.flykraft.model.notification.*;
 import com.flykraft.model.store.Order;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.model.stakeholder.StakeHolderCategory;
+import com.flykraft.model.store.OrderStatus;
 import com.flykraft.repository.notification.ChannelSubRepo;
 import com.flykraft.repository.notification.NotifyMsgRepo;
 import com.flykraft.repository.notification.NotifySubRepo;
@@ -50,18 +51,6 @@ public class NotificationService {
                 notifyMsgRepo.save(notifyMsg);
             }
         }
-    }
-
-    public void optInForNotifications(Integer stakeHolderId) {
-        StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(stakeHolderId);
-        stakeHolder.setOptedInForNotifications(true);
-        stakeHolderService.updateStakeHolder(stakeHolder);
-    }
-
-    public void optOutOfNotifications(Integer stakeHolderId) {
-        StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(stakeHolderId);
-        stakeHolder.setOptedInForNotifications(false);
-        stakeHolderService.updateStakeHolder(stakeHolder);
     }
 
     public void subscribeToStatuses(Integer stakeHolderId, Set<Integer> orderStatusIds) {
@@ -123,16 +112,15 @@ public class NotificationService {
     public void notify(Order order) {
         List<NotifySub> subs = notifySubRepo.findByOrderId(order.getOrderId());
         for (NotifySub sub : subs) {
-            Integer stakeHolderId = sub.getStakeHolderId();
-            executorService.submit(() -> processNotificationForSubscriber(order, stakeHolderId));
+            executorService.submit(() -> processNotificationForSubscriber(order, sub.getStakeHolderId()));
         }
     }
 
-    public void replayNotificationToStakeholder(Order order, Integer statusId, Integer stakeHolderId) {
-        if (order.getStatusId() < statusId) {
+    public void replayNotificationToStakeholder(Order order, OrderStatus orderStatus, Integer stakeHolderId) {
+        if (order.getStatusId() < orderStatus.getId()) {
             throw new IllegalArgumentException("Invalid replay of order status!");
         }
-        processNotificationForSubscriber(order, statusId, stakeHolderId);
+        processNotificationForSubscriber(order, orderStatus.getId(), stakeHolderId);
     }
 
     private void processNotificationForSubscriber(Order order, Integer stakeHolderId) {

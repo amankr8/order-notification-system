@@ -20,7 +20,15 @@ public class StakeHolderService {
         return stakeHolderRepo.save(stakeHolder);
     }
 
-    public StakeHolder updateStakeHolder(StakeHolder stakeHolder) {
-        return stakeHolderRepo.save(stakeHolder);
+    public void optInForNotifications(Integer stakeHolderId) {
+        StakeHolder stakeHolder = getStakeHolderById(stakeHolderId);
+        stakeHolder.setOptedInForNotifications(true);
+        stakeHolderRepo.save(stakeHolder);
+    }
+
+    public void optOutOfNotifications(Integer stakeHolderId) {
+        StakeHolder stakeHolder = getStakeHolderById(stakeHolderId);
+        stakeHolder.setOptedInForNotifications(false);
+        stakeHolderRepo.save(stakeHolder);
     }
 }

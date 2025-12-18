@@ -47,6 +47,8 @@ public class DemoRunner {
 
             System.out.println("\nDelivering orders...");
             orderService.changeStatus(order1, OrderStatus.DELIVERED);
+
+            notificationService.replayNotificationToStakeholder(order1, OrderStatus.PLACED, customer1.getStakeHolderId());
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
