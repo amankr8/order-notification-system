@@ -41,9 +41,6 @@ public class DemoRunner {
 
             Thread.sleep(2000);
 
-            subscriptionService.unsubscribeFromOrder(customer1.getStakeHolderId(), order1.getOrderId());
-            System.out.println("\n" + customer1.getCustomerName() + " has unsubscribed from order ID: " + order1.getOrderId());
-
             System.out.println("\nDelivering orders...");
             orderService.changeStatus(order1, OrderStatus.DELIVERED);
         } catch (InterruptedException e) {
