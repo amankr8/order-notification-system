@@ -9,8 +9,10 @@ import com.flykraft.service.stakeholder.StakeHolderService;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 public class NotificationService {
+    public static final Logger logger = Logger.getLogger(NotificationService.class.getName());
 
     private final SubscriptionService subscriptionService;
     private final StakeHolderService stakeHolderService;
@@ -30,7 +32,13 @@ public class NotificationService {
         List<StakeHolder> subscribers = subscriptionService.getSubscribersByOrderId(order.getOrderId());
         for (StakeHolder subscriber : subscribers) {
             if (validateStatusSubscriptionByStakeHolder(subscriber.getStakeHolderId(), order.getStatusId())) {
-                executorService.submit(() -> processNotificationForSubscriber(subscriber, order));
+                executorService.submit(() -> {
+                    try {
+                        processNotificationForSubscriber(subscriber, order);
+                    } catch (Exception e) {
+                        logger.info("Failed to process notification for Stakeholder ID: " + subscriber.getStakeHolderId() + " and Order ID: " + order.getOrderId() + " - " + e.getMessage());
+                    }
+                });
             }
         }
     }

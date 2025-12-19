@@ -135,6 +135,6 @@ public class SubscriptionService {
             }
         }
 
-        throw new RuntimeException("No message found for the order status.");
+        throw new RuntimeException("No message found for the Order Status.");
     }
 }
