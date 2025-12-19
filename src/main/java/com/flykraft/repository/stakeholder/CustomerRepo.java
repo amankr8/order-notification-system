@@ -62,7 +62,6 @@ public class CustomerRepo implements Repository<Integer, Customer> {
         clone.setStakeHolderId(entity.getStakeHolderId());
         clone.setStakeHolderName(entity.getStakeHolderName());
         clone.setStakeHolderCategoryId(entity.getStakeHolderCategoryId());
-        clone.setOptedInForNotifications(entity.hasOptedInForNotifications());
         return clone;
     }
 }

@@ -67,7 +67,6 @@ public class StakeHolderRepo implements Repository<Integer, StakeHolder> {
     private StakeHolder clone(StakeHolder entity) {
         StakeHolder clone = new StakeHolder(entity.getStakeHolderName(), entity.getStakeHolderCategoryId());
         clone.setStakeHolderId(entity.getStakeHolderId());
-        clone.setOptedInForNotifications(entity.hasOptedInForNotifications());
         return clone;
     }
 }
