@@ -1,21 +1,21 @@
 package com.flykraft.model.notification;
 
-public class NotifySub {
-    private Integer notifySubId;
+public class OrderSub {
+    private Integer id;
     private Integer stakeHolderId;
     private Integer orderId;
 
-    public NotifySub(Integer stakeHolderId, Integer orderId) {
+    public OrderSub(Integer stakeHolderId, Integer orderId) {
         this.stakeHolderId = stakeHolderId;
         this.orderId = orderId;
     }
 
-    public Integer getNotifySubId() {
-        return notifySubId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setNotifySubId(Integer notifySubId) {
-        this.notifySubId = notifySubId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public Integer getStakeHolderId() {

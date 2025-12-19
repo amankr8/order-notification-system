@@ -96,22 +96,22 @@ public class NotificationService {
     }
 
     public void subscribeToOrder(Integer stakeHolderId, Integer orderId) {
-        var notifySub = new NotifySub(stakeHolderId, orderId);
+        var notifySub = new OrderSub(stakeHolderId, orderId);
         notifySubRepo.save(notifySub);
     }
 
     public void unsubscribeFromOrder(Integer stakeHolderId, Integer orderId) {
-        List<NotifySub> subs = notifySubRepo.findByOrderId(orderId);
+        List<OrderSub> subs = notifySubRepo.findByOrderId(orderId);
         for (var sub : subs) {
             if (sub.getStakeHolderId().equals(stakeHolderId)) {
-                notifySubRepo.deleteById(sub.getNotifySubId());
+                notifySubRepo.deleteById(sub.getId());
             }
         }
     }
 
     public void notify(Order order) {
-        List<NotifySub> subs = notifySubRepo.findByOrderId(order.getOrderId());
-        for (NotifySub sub : subs) {
+        List<OrderSub> subs = notifySubRepo.findByOrderId(order.getOrderId());
+        for (OrderSub sub : subs) {
             executorService.submit(() -> processNotificationForSubscriber(order, sub.getStakeHolderId()));
         }
     }
