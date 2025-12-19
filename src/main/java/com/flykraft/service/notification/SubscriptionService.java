@@ -29,6 +29,7 @@ public class SubscriptionService {
         this.channelSubRepo = channelSubRepo;
         this.statusSubRepo = statusSubRepo;
         this.stakeHolderService = stakeHolderService;
+        addDefaultNotificationMessages();
     }
 
     private void addDefaultNotificationMessages() {

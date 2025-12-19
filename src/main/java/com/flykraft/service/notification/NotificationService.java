@@ -29,7 +29,9 @@ public class NotificationService {
     public void notify(Order order) {
         List<StakeHolder> subscribers = subscriptionService.getSubscribersByOrderId(order.getOrderId());
         for (StakeHolder subscriber : subscribers) {
-            executorService.submit(() -> processNotificationForSubscriber(subscriber, order));
+            if (validateStatusSubscriptionByStakeHolder(subscriber.getStakeHolderId(), order.getStatusId())) {
+                executorService.submit(() -> processNotificationForSubscriber(subscriber, order));
+            }
         }
     }
 
@@ -38,7 +40,9 @@ public class NotificationService {
             throw new IllegalArgumentException("Invalid replay of order status!");
         }
         StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(stakeHolderId);
-        processNotificationForSubscriber(stakeHolder, order, orderStatus.getId());
+        if (validateStatusSubscriptionByStakeHolder(stakeHolder.getStakeHolderId(), order.getStatusId())) {
+            processNotificationForSubscriber(stakeHolder, order, orderStatus.getId());
+        }
     }
 
     private void processNotificationForSubscriber(StakeHolder stakeHolder, Order order) {
@@ -46,13 +50,11 @@ public class NotificationService {
     }
 
     private void processNotificationForSubscriber(StakeHolder stakeHolder, Order order, Integer statusId) {
-        if (validateStatusSubscriptionByStakeHolder(stakeHolder.getStakeHolderId(), statusId)) {
-            String message = subscriptionService.getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), statusId);
-            String notification = "[ORDER ID:" + order.getOrderId() + "][CUSTOMER ID:" + order.getCustomerId() + "][VENDOR ID:" + order.getVendorId() + "] - " + message;
-            List<Channel> channels = subscriptionService.getChannelSubscriptionsByStakeHolderId(stakeHolder.getStakeHolderId());
-            for (Channel channel : channels) {
-                executorService.submit(() -> processNotificationForChannel(channel, notification));
-            }
+        String message = subscriptionService.getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), statusId);
+        String notification = "[ORDER ID:" + order.getOrderId() + "][CUSTOMER ID:" + order.getCustomerId() + "][VENDOR ID:" + order.getVendorId() + "] - " + message;
+        List<Channel> channels = subscriptionService.getChannelSubscriptionsByStakeHolderId(stakeHolder.getStakeHolderId());
+        for (Channel channel : channels) {
+            executorService.submit(() -> processNotificationForChannel(channel, notification));
         }
     }
 
