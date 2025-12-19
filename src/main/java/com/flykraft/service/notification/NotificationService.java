@@ -7,7 +7,7 @@ import com.flykraft.model.stakeholder.StakeHolderCategory;
 import com.flykraft.model.store.OrderStatus;
 import com.flykraft.repository.notification.ChannelSubRepo;
 import com.flykraft.repository.notification.NotifyMsgRepo;
-import com.flykraft.repository.notification.NotifySubRepo;
+import com.flykraft.repository.notification.OrderSubRepo;
 import com.flykraft.repository.notification.StatusSubRepo;
 import com.flykraft.service.stakeholder.StakeHolderService;
 
@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class NotificationService {
 
-    private final NotifySubRepo notifySubRepo;
+    private final OrderSubRepo orderSubRepo;
     private final NotifyMsgRepo notifyMsgRepo;
     private final ChannelSubRepo channelSubRepo;
     private final StatusSubRepo statusSubRepo;
@@ -28,8 +28,8 @@ public class NotificationService {
 
     private final ExecutorService executorService;
 
-    public NotificationService(NotifySubRepo notifySubRepo, NotifyMsgRepo notifyMsgRepo, ChannelSubRepo channelSubRepo, StatusSubRepo statusSubRepo, StakeHolderService stakeHolderService) {
-        this.notifySubRepo = notifySubRepo;
+    public NotificationService(OrderSubRepo orderSubRepo, NotifyMsgRepo notifyMsgRepo, ChannelSubRepo channelSubRepo, StatusSubRepo statusSubRepo, StakeHolderService stakeHolderService) {
+        this.orderSubRepo = orderSubRepo;
         this.notifyMsgRepo = notifyMsgRepo;
         this.channelSubRepo = channelSubRepo;
         this.statusSubRepo = statusSubRepo;
@@ -97,20 +97,20 @@ public class NotificationService {
 
     public void subscribeToOrder(Integer stakeHolderId, Integer orderId) {
         var notifySub = new OrderSub(stakeHolderId, orderId);
-        notifySubRepo.save(notifySub);
+        orderSubRepo.save(notifySub);
     }
 
     public void unsubscribeFromOrder(Integer stakeHolderId, Integer orderId) {
-        List<OrderSub> subs = notifySubRepo.findByOrderId(orderId);
+        List<OrderSub> subs = orderSubRepo.findByOrderId(orderId);
         for (var sub : subs) {
             if (sub.getStakeHolderId().equals(stakeHolderId)) {
-                notifySubRepo.deleteById(sub.getId());
+                orderSubRepo.deleteById(sub.getId());
             }
         }
     }
 
     public void notify(Order order) {
-        List<OrderSub> subs = notifySubRepo.findByOrderId(order.getOrderId());
+        List<OrderSub> subs = orderSubRepo.findByOrderId(order.getOrderId());
         for (OrderSub sub : subs) {
             executorService.submit(() -> processNotificationForSubscriber(order, sub.getStakeHolderId()));
         }
