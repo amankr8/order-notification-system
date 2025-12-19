@@ -4,12 +4,10 @@ public class StakeHolder {
     private Integer stakeHolderId;
     private String stakeHolderName;
     private Integer stakeHolderCategoryId;
-    private boolean optedInForNotifications;
 
     public StakeHolder(String stakeHolderName, Integer stakeHolderCategoryId) {
         this.stakeHolderName = stakeHolderName;
         this.stakeHolderCategoryId = stakeHolderCategoryId;
-        this.optedInForNotifications = true;
     }
 
     public Integer getStakeHolderId() {
@@ -34,13 +32,5 @@ public class StakeHolder {
 
     public void setStakeHolderCategoryId(Integer stakeHolderCategoryId) {
         this.stakeHolderCategoryId = stakeHolderCategoryId;
-    }
-
-    public boolean hasOptedInForNotifications() {
-        return optedInForNotifications;
-    }
-
-    public void setOptedInForNotifications(boolean optedInForNotifications) {
-        this.optedInForNotifications = optedInForNotifications;
     }
 }

@@ -112,7 +112,8 @@ public class NotificationService {
     public void notify(Order order) {
         List<OrderSub> subs = orderSubRepo.findByOrderId(order.getOrderId());
         for (OrderSub sub : subs) {
-            executorService.submit(() -> processNotificationForSubscriber(order, sub.getStakeHolderId()));
+            StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
+            executorService.submit(() -> processNotificationForSubscriber(stakeHolder, order));
         }
     }
 
@@ -120,19 +121,19 @@ public class NotificationService {
         if (order.getStatusId() < orderStatus.getId()) {
             throw new IllegalArgumentException("Invalid replay of order status!");
         }
-        processNotificationForSubscriber(order, orderStatus.getId(), stakeHolderId);
-    }
-
-    private void processNotificationForSubscriber(Order order, Integer stakeHolderId) {
-        processNotificationForSubscriber(order, order.getStatusId(), stakeHolderId);
-    }
-
-    private void processNotificationForSubscriber(Order order, Integer statusId, Integer stakeHolderId) {
         StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(stakeHolderId);
-        if (stakeHolder.hasOptedInForNotifications() && validateStatusSubscriptionByStakeHolder(stakeHolder, statusId)) {
+        processNotificationForSubscriber(stakeHolder, order, orderStatus.getId());
+    }
+
+    private void processNotificationForSubscriber(StakeHolder stakeHolder, Order order) {
+        processNotificationForSubscriber(stakeHolder, order, order.getStatusId());
+    }
+
+    private void processNotificationForSubscriber(StakeHolder stakeHolder, Order order, Integer statusId) {
+        if (validateStatusSubscriptionByStakeHolder(stakeHolder, statusId)) {
             String message = getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), statusId);
             String notification = "[ORDER ID:" + order.getOrderId() + "][CUSTOMER ID:" + order.getCustomerId() + "][VENDOR ID:" + order.getVendorId() + "] - " + message;
-            List<Channel> channels = getChannelSubscriptionsByStakeHolderId(stakeHolderId);
+            List<Channel> channels = getChannelSubscriptionsByStakeHolderId(stakeHolder.getStakeHolderId());
             for (Channel channel : channels) {
                 executorService.submit(() -> processNotificationForChannel(channel, notification));
             }
