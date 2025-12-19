@@ -3,17 +3,17 @@ package com.flykraft.service.stakeholder;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.model.stakeholder.Vendor;
 import com.flykraft.repository.stakeholder.VendorRepo;
-import com.flykraft.service.notification.NotificationService;
+import com.flykraft.service.notification.SubscriptionService;
 
 public class VendorService {
     private final VendorRepo vendorRepo;
     private final StakeHolderService stakeHolderService;
-    private final NotificationService notificationService;
+    private final SubscriptionService subscriptionService;
 
-    public VendorService(VendorRepo vendorRepo, StakeHolderService stakeHolderService, NotificationService notificationService) {
+    public VendorService(VendorRepo vendorRepo, StakeHolderService stakeHolderService, SubscriptionService subscriptionService) {
         this.vendorRepo = vendorRepo;
         this.stakeHolderService = stakeHolderService;
-        this.notificationService = notificationService;
+        this.subscriptionService = subscriptionService;
     }
 
     public Vendor getVendorById(Integer id) {
@@ -25,8 +25,8 @@ public class VendorService {
         StakeHolder stakeHolder = new StakeHolder(vendor.getVendorName(), vendor.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         vendor.setStakeHolderId(stakeHolder.getStakeHolderId());
-        notificationService.subscribeToStatuses(vendor.getStakeHolderId(), vendor.getDefaultSubscriptionStatusIds());
-        notificationService.subscribeToChannels(vendor.getStakeHolderId(), vendor.getDefaultSubscriptionChannelIds());
+        subscriptionService.subscribeToStatuses(vendor.getStakeHolderId(), vendor.getDefaultSubscriptionStatusIds());
+        subscriptionService.subscribeToChannels(vendor.getStakeHolderId(), vendor.getDefaultSubscriptionChannelIds());
         return vendorRepo.save(vendor);
     }
 }

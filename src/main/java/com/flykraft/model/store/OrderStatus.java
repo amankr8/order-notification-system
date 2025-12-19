@@ -28,4 +28,13 @@ public enum OrderStatus {
     public void setName(java.lang.String name) {
         this.name = name;
     }
+
+    public static OrderStatus getStatusById(Integer id) {
+        for (OrderStatus orderStatus : OrderStatus.values()) {
+            if (orderStatus.getId().equals(id)) {
+                return orderStatus;
+            }
+        }
+        return null;
+    }
 }

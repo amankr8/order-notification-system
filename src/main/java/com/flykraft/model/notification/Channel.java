@@ -31,9 +31,9 @@ public enum Channel {
     }
 
     public static Channel getChannelById(Integer id) {
-        for (Channel type : Channel.values()) {
-            if (type.getId().equals(id)) {
-                return type;
+        for (Channel channel : Channel.values()) {
+            if (channel.getId().equals(id)) {
+                return channel;
             }
         }
         return null;

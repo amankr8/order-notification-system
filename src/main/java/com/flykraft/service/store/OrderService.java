@@ -1,7 +1,5 @@
 package com.flykraft.service.store;
 
-import com.flykraft.exception.DataConstraintViolationException;
-import com.flykraft.exception.ResourceNotFoundException;
 import com.flykraft.model.store.Order;
 import com.flykraft.model.store.OrderStatus;
 import com.flykraft.model.stakeholder.Customer;
@@ -9,6 +7,7 @@ import com.flykraft.model.stakeholder.DeliveryPartner;
 import com.flykraft.model.stakeholder.Vendor;
 import com.flykraft.repository.store.OrderRepo;
 import com.flykraft.service.notification.NotificationService;
+import com.flykraft.service.notification.SubscriptionService;
 import com.flykraft.service.stakeholder.CustomerService;
 import com.flykraft.service.stakeholder.DeliveryPartnerService;
 import com.flykraft.service.stakeholder.VendorService;
@@ -22,13 +21,15 @@ public class OrderService {
     private final CustomerService customerService;
     private final VendorService vendorService;
     private final DeliveryPartnerService deliveryPartnerService;
+    private final SubscriptionService subscriptionService;
     private final NotificationService notificationService;
 
-    public OrderService(OrderRepo orderRepo, CustomerService customerService, VendorService vendorService, DeliveryPartnerService deliveryPartnerService, NotificationService notificationService) {
+    public OrderService(OrderRepo orderRepo, CustomerService customerService, VendorService vendorService, DeliveryPartnerService deliveryPartnerService, SubscriptionService subscriptionService, NotificationService notificationService) {
         this.orderRepo = orderRepo;
         this.customerService = customerService;
         this.vendorService = vendorService;
         this.deliveryPartnerService = deliveryPartnerService;
+        this.subscriptionService = subscriptionService;
         this.notificationService = notificationService;
     }
 
@@ -53,15 +54,15 @@ public class OrderService {
         DeliveryPartner deliveryPartner = deliveryPartnerService.getPartnerById(partnerId);
         Order order = getOrderById(orderId);
         order.setPartnerId(deliveryPartner.getPartnerId());
-        notificationService.subscribeToOrder(deliveryPartner.getStakeHolderId(), order.getOrderId());
+        subscriptionService.subscribeToOrder(deliveryPartner.getStakeHolderId(), order.getOrderId());
         orderRepo.save(order);
     }
 
     private void subscribeToRelevantStakeHolders(Order order) {
         Customer customer = customerService.getCustomerById(order.getCustomerId());
-        notificationService.subscribeToOrder(customer.getStakeHolderId(), order.getOrderId());
+        subscriptionService.subscribeToOrder(customer.getStakeHolderId(), order.getOrderId());
         Vendor vendor = vendorService.getVendorById(order.getVendorId());
-        notificationService.subscribeToOrder(vendor.getStakeHolderId(), order.getOrderId());
+        subscriptionService.subscribeToOrder(vendor.getStakeHolderId(), order.getOrderId());
     }
 
     public void changeStatus(Order order, OrderStatus orderStatus) {

@@ -1,15 +1,13 @@
 package com.flykraft;
 
-import com.flykraft.repository.notification.ChannelSubRepo;
-import com.flykraft.repository.notification.NotifyMsgRepo;
-import com.flykraft.repository.notification.OrderSubRepo;
-import com.flykraft.repository.notification.StatusSubRepo;
+import com.flykraft.repository.notification.*;
 import com.flykraft.repository.store.OrderRepo;
 import com.flykraft.repository.stakeholder.CustomerRepo;
 import com.flykraft.repository.stakeholder.DeliveryPartnerRepo;
 import com.flykraft.repository.stakeholder.StakeHolderRepo;
 import com.flykraft.repository.stakeholder.VendorRepo;
 import com.flykraft.service.notification.NotificationService;
+import com.flykraft.service.notification.SubscriptionService;
 import com.flykraft.service.store.OrderService;
 import com.flykraft.service.stakeholder.CustomerService;
 import com.flykraft.service.stakeholder.DeliveryPartnerService;
@@ -32,14 +30,15 @@ public class Main {
 
         StakeHolderService stakeHolderService = new StakeHolderService(stakeHolderRepo);
 
-        NotificationService notificationService = new NotificationService(orderSubRepo, notifyMsgRepo, channelSubRepo, statusSubRepo, stakeHolderService);
+        SubscriptionService subscriptionService = new SubscriptionService(orderSubRepo, notifyMsgRepo, channelSubRepo, statusSubRepo, stakeHolderService);
+        NotificationService notificationService = new NotificationService(subscriptionService, stakeHolderService);
 
-        CustomerService customerService = new CustomerService(customerRepo, stakeHolderService, notificationService);
-        VendorService vendorService = new VendorService(vendorRepo, stakeHolderService, notificationService);
-        DeliveryPartnerService deliveryPartnerService = new DeliveryPartnerService(deliveryPartnerRepo, stakeHolderService, notificationService);
+        CustomerService customerService = new CustomerService(customerRepo, stakeHolderService, subscriptionService);
+        VendorService vendorService = new VendorService(vendorRepo, stakeHolderService, subscriptionService);
+        DeliveryPartnerService deliveryPartnerService = new DeliveryPartnerService(deliveryPartnerRepo, stakeHolderService, subscriptionService);
 
-        OrderService orderService = new OrderService(orderRepo, customerService, vendorService, deliveryPartnerService, notificationService);
+        OrderService orderService = new OrderService(orderRepo, customerService, vendorService, deliveryPartnerService, subscriptionService, notificationService);
 
-        DemoRunner.runDemo(stakeHolderService, customerService, vendorService, deliveryPartnerService, orderService, notificationService);
+        DemoRunner.runDemo(customerService, vendorService, deliveryPartnerService, orderService, subscriptionService);
     }
 }

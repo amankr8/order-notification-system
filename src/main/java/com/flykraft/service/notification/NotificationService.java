@@ -3,117 +3,33 @@ package com.flykraft.service.notification;
 import com.flykraft.model.notification.*;
 import com.flykraft.model.store.Order;
 import com.flykraft.model.stakeholder.StakeHolder;
-import com.flykraft.model.stakeholder.StakeHolderCategory;
 import com.flykraft.model.store.OrderStatus;
-import com.flykraft.repository.notification.ChannelSubRepo;
-import com.flykraft.repository.notification.NotifyMsgRepo;
-import com.flykraft.repository.notification.OrderSubRepo;
-import com.flykraft.repository.notification.StatusSubRepo;
 import com.flykraft.service.stakeholder.StakeHolderService;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NotificationService {
 
-    private final OrderSubRepo orderSubRepo;
-    private final NotifyMsgRepo notifyMsgRepo;
-    private final ChannelSubRepo channelSubRepo;
-    private final StatusSubRepo statusSubRepo;
+    private final SubscriptionService subscriptionService;
     private final StakeHolderService stakeHolderService;
-
     private final ExecutorService executorService;
 
-    public NotificationService(OrderSubRepo orderSubRepo, NotifyMsgRepo notifyMsgRepo, ChannelSubRepo channelSubRepo, StatusSubRepo statusSubRepo, StakeHolderService stakeHolderService) {
-        this.orderSubRepo = orderSubRepo;
-        this.notifyMsgRepo = notifyMsgRepo;
-        this.channelSubRepo = channelSubRepo;
-        this.statusSubRepo = statusSubRepo;
+    public NotificationService(SubscriptionService subscriptionService, StakeHolderService stakeHolderService) {
+        this.subscriptionService = subscriptionService;
         this.stakeHolderService = stakeHolderService;
         this.executorService = Executors.newFixedThreadPool(10, task -> {
             Thread t = new Thread(task);
             t.setDaemon(true);
             return t;
         });
-        addDefaultNotificationMessages();
-    }
-
-    private void addDefaultNotificationMessages() {
-        for (StakeHolderCategory stakeHolderCategory : StakeHolderCategory.values()) {
-            for (Map.Entry<Integer, String> entry : stakeHolderCategory.getDefaultSubscriptionMsgByStatusIds().entrySet()) {
-                Integer orderStatusId = entry.getKey();
-                String message = entry.getValue();
-                NotifyMsg notifyMsg = new NotifyMsg(stakeHolderCategory.getId(), orderStatusId, message);
-                notifyMsgRepo.save(notifyMsg);
-            }
-        }
-    }
-
-    public void subscribeToStatuses(Integer stakeHolderId, Set<Integer> orderStatusIds) {
-        for (Integer orderStatusId : orderStatusIds) {
-            StatusSub statusSub = new StatusSub(stakeHolderId, orderStatusId);
-            statusSubRepo.save(statusSub);
-        }
-    }
-
-    public void unsubscribeFromStatuses(Integer stakeHolderId, Set<Integer> orderStatusIds) {
-        List<StatusSub> statusSubs = statusSubRepo.findByStakeHolderId(stakeHolderId);
-        for (StatusSub statusSub : statusSubs) {
-            if (orderStatusIds.contains(statusSub.getOrderStatusId())) {
-                statusSubRepo.deleteById(statusSub.getStatusSubId());
-            }
-        }
-    }
-
-    public void subscribeToChannels(Integer stakeHolderId, Set<Integer> channelIds) {
-        for (Integer channelId : channelIds) {
-            ChannelSub channelSub = new ChannelSub(stakeHolderId, channelId);
-            channelSubRepo.save(channelSub);
-        }
-    }
-
-    public void unsubscribeFromChannels(Integer stakeHolderId, Set<Integer> channelIds) {
-        List<ChannelSub> channelSubs = channelSubRepo.findByStakeHolderId(stakeHolderId);
-        for (ChannelSub channelSub : channelSubs) {
-            if (channelIds.contains(channelSub.getChannelId())) {
-                channelSubRepo.deleteById(channelSub.getChannelSubId());
-            }
-        }
-    }
-
-    public void updateStatusMessageForCategory(Integer categoryId, Integer statusId, String message) {
-        List<NotifyMsg> msgsByCategory = notifyMsgRepo.findByCategoryId(categoryId);
-        for (NotifyMsg notifyMsg : msgsByCategory) {
-            if (notifyMsg.getOrderStatusId().equals(statusId)) {
-                notifyMsg.setMessage(message);
-                notifyMsgRepo.save(notifyMsg);
-            }
-        }
-    }
-
-    public void subscribeToOrder(Integer stakeHolderId, Integer orderId) {
-        var notifySub = new OrderSub(stakeHolderId, orderId);
-        orderSubRepo.save(notifySub);
-    }
-
-    public void unsubscribeFromOrder(Integer stakeHolderId, Integer orderId) {
-        List<OrderSub> subs = orderSubRepo.findByOrderId(orderId);
-        for (var sub : subs) {
-            if (sub.getStakeHolderId().equals(stakeHolderId)) {
-                orderSubRepo.deleteById(sub.getId());
-            }
-        }
     }
 
     public void notify(Order order) {
-        List<OrderSub> subs = orderSubRepo.findByOrderId(order.getOrderId());
-        for (OrderSub sub : subs) {
-            StakeHolder stakeHolder = stakeHolderService.getStakeHolderById(sub.getStakeHolderId());
-            executorService.submit(() -> processNotificationForSubscriber(stakeHolder, order));
+        List<StakeHolder> subscribers = subscriptionService.getSubscribersByOrderId(order.getOrderId());
+        for (StakeHolder subscriber : subscribers) {
+            executorService.submit(() -> processNotificationForSubscriber(subscriber, order));
         }
     }
 
@@ -130,10 +46,10 @@ public class NotificationService {
     }
 
     private void processNotificationForSubscriber(StakeHolder stakeHolder, Order order, Integer statusId) {
-        if (validateStatusSubscriptionByStakeHolder(stakeHolder, statusId)) {
-            String message = getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), statusId);
+        if (validateStatusSubscriptionByStakeHolder(stakeHolder.getStakeHolderId(), statusId)) {
+            String message = subscriptionService.getMessageByCategoryAndStatusId(stakeHolder.getStakeHolderCategoryId(), statusId);
             String notification = "[ORDER ID:" + order.getOrderId() + "][CUSTOMER ID:" + order.getCustomerId() + "][VENDOR ID:" + order.getVendorId() + "] - " + message;
-            List<Channel> channels = getChannelSubscriptionsByStakeHolderId(stakeHolder.getStakeHolderId());
+            List<Channel> channels = subscriptionService.getChannelSubscriptionsByStakeHolderId(stakeHolder.getStakeHolderId());
             for (Channel channel : channels) {
                 executorService.submit(() -> processNotificationForChannel(channel, notification));
             }
@@ -144,33 +60,13 @@ public class NotificationService {
         channel.getService().sendNotification(notification);
     }
 
-    public boolean validateStatusSubscriptionByStakeHolder(StakeHolder stakeHolder, Integer orderStatusId) {
-        List<StatusSub> statusSubs = statusSubRepo.findByStakeHolderId(stakeHolder.getStakeHolderId());
-        for (StatusSub statusSub : statusSubs) {
-            if (statusSub.getOrderStatusId().equals(orderStatusId)) {
+    public boolean validateStatusSubscriptionByStakeHolder(Integer stakeHolderId, Integer orderStatusId) {
+        List<OrderStatus> orderStatuses = subscriptionService.getStatusSubscriptionByStakeHolderId(stakeHolderId);
+        for (OrderStatus orderStatus : orderStatuses) {
+            if (orderStatus.getId().equals(orderStatusId)) {
                 return true;
             }
         }
         return false;
-    }
-
-    public List<Channel> getChannelSubscriptionsByStakeHolderId(Integer stakeHolderId) {
-        List<ChannelSub> channelSubs = channelSubRepo.findByStakeHolderId(stakeHolderId);
-        List<Channel> channels = new ArrayList<>();
-        for (ChannelSub channelSub : channelSubs) {
-            channels.add(Channel.getChannelById(channelSub.getChannelId()));
-        }
-        return channels;
-    }
-
-    public String getMessageByCategoryAndStatusId(Integer categoryId, Integer statusId) {
-        List<NotifyMsg> notifyMsgs = notifyMsgRepo.findByCategoryId(categoryId);
-        for (NotifyMsg notifyMsg : notifyMsgs) {
-            if (notifyMsg.getOrderStatusId().equals(statusId)) {
-                return notifyMsg.getMessage();
-            }
-        }
-
-        throw new RuntimeException("No message found for the order status.");
     }
 }

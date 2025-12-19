@@ -5,16 +5,17 @@ import com.flykraft.model.stakeholder.Customer;
 import com.flykraft.model.stakeholder.StakeHolder;
 import com.flykraft.repository.stakeholder.CustomerRepo;
 import com.flykraft.service.notification.NotificationService;
+import com.flykraft.service.notification.SubscriptionService;
 
 public class CustomerService {
     private final CustomerRepo customerRepo;
     private final StakeHolderService stakeHolderService;
-    private final NotificationService notificationService;
+    private final SubscriptionService subscriptionService;
 
-    public CustomerService(CustomerRepo customerRepo, StakeHolderService stakeHolderService, NotificationService notificationService) {
+    public CustomerService(CustomerRepo customerRepo, StakeHolderService stakeHolderService, SubscriptionService subscriptionService) {
         this.customerRepo = customerRepo;
         this.stakeHolderService = stakeHolderService;
-        this.notificationService = notificationService;
+        this.subscriptionService = subscriptionService;
     }
 
     public Customer getCustomerById(Integer id) {
@@ -26,8 +27,8 @@ public class CustomerService {
         StakeHolder stakeHolder = new StakeHolder(customer.getCustomerName(), customer.getStakeHolderCategoryId());
         stakeHolder = stakeHolderService.createStakeHolder(stakeHolder);
         customer.setStakeHolderId(stakeHolder.getStakeHolderId());
-        notificationService.subscribeToStatuses(customer.getStakeHolderId(), customer.getDefaultSubscriptionStatusIds());
-        notificationService.subscribeToChannels(customer.getStakeHolderId(), customer.getDefaultSubscriptionChannelIds());
+        subscriptionService.subscribeToStatuses(customer.getStakeHolderId(), customer.getDefaultSubscriptionStatusIds());
+        subscriptionService.subscribeToChannels(customer.getStakeHolderId(), customer.getDefaultSubscriptionChannelIds());
         return customerRepo.save(customer);
     }
 }
